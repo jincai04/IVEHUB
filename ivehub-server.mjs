@@ -1,4 +1,4 @@
-﻿// IVEHUB portal + z.ai token monitor â€” http://localhost:3007
+// IVEHUB portal + z.ai token monitor â€” http://localhost:3007
 // Login-gated. Password via ENV IVE_PASS (default set below). Session cookie after login.
 import { DatabaseSync } from 'node:sqlite';
 import http from 'node:http';
@@ -277,6 +277,14 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
  .url{display:block;color:#5b7189;font-size:.65rem;margin-top:4px;word-break:break-all}
  .arrow{flex:none;color:#38bdf8;font-size:1.1rem;transform:translateX(-6px);opacity:0;transition:all .25s}
  .app:hover .arrow{transform:translateX(0);opacity:1}
+ .hclear{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#8aa0b8;padding:5px 12px;border-radius:10px;font-size:.68rem;letter-spacing:1px;cursor:pointer;transition:all .25s}
+ .hclear:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#f87171}
+ .history{display:flex;flex-wrap:wrap;gap:12px}
+ .hchip{display:flex;align-items:center;gap:10px;padding:11px 16px;text-decoration:none;color:inherit;transition:transform .25s cubic-bezier(.22,1,.36,1),border-color .25s}
+ .hchip:hover{transform:translateY(-3px);border-color:rgba(125,211,252,.5)}
+ .hchip .hico{font-size:1.25rem;flex:none}
+ .hchip .hn{display:block;font-weight:650;font-size:.85rem;color:#eef4fb}
+ .hchip .ht{display:block;color:#5b7189;font-size:.65rem;margin-top:2px}
  footer{text-align:center;color:#46586e;font-size:.7rem;margin-top:52px;letter-spacing:1px;animation:fadeUp 1s ease both}
  @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
  @keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
@@ -308,7 +316,11 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
  <h2>âš¡ OpenClaw Token Usage <span class="planchip" id="plan"></span></h2>
  <div class="usage" id="cards"><div class="glass card" style="color:#8aa0b8">loadingâ€¦</div></div>
 
- <h2>ðŸ“ Applications</h2>
+<div id="histWrap" style="display:none">
+ <h2>&#128339; Recently Opened <button class="hclear" id="hclear">CLEAR</button></h2>
+ <div class="history" id="history"></div>
+</div>
+<h2>&#128193; Applications</h2>
  <div class="hubs">
   <div class="hub-area">
    <button class="hub" id="hub" title="Open MGM apps">
@@ -420,6 +432,26 @@ ${moduCards}
 </div>
 
 <script>
+// recently opened history (localStorage)
+var HKEY = 'ivehub_history';
+function loadH(){ try { return JSON.parse(localStorage.getItem(HKEY)) || []; } catch(e){ return []; } }
+function saveH(h){ try { localStorage.setItem(HKEY, JSON.stringify(h)); } catch(e){} }
+function ago(ts){ var s=(Date.now()-ts)/1000; if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
+function renderH(){
+  var h = loadH(), w = document.getElementById('histWrap'), el = document.getElementById('history');
+  if (!h.length) { w.style.display = 'none'; return; }
+  w.style.display = '';
+  el.innerHTML = h.map(function(a){ return '<a class="glass hchip" href="'+a.url+'" target="_blank" rel="noopener"><span class="hico">'+a.icon+'</span><span><span class="hn">'+a.name+'</span><span class="ht">'+ago(a.ts)+'</span></span></a>'; }).join('');
+}
+document.addEventListener('click', function(e){
+  var a = e.target.closest ? e.target.closest('a.app') : null; if (!a) return;
+  var nm = a.querySelector('.nm'), ic = a.querySelector('.ico');
+  var h = loadH().filter(function(x){ return x.url !== a.href; });
+  h.unshift({ name: nm ? nm.textContent : '?', icon: ic ? ic.textContent : '', url: a.href, ts: Date.now() });
+  saveH(h.slice(0, 8)); renderH();
+});
+document.getElementById('hclear').addEventListener('click', function(){ try { localStorage.removeItem(HKEY); } catch(e){} renderH(); });
+renderH();
 // welcome splash after fresh login
 if (new URLSearchParams(location.search).get('w') === '1') {
   const sp = document.getElementById('splash');

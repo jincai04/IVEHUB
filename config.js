@@ -5,6 +5,10 @@ window.IVEHUB_CONFIG = {
   // IVE Token API (the local backend that checks OpenClaw usage)
   tokenApi: 'https://monitoring.genset.com.my/zai-usage-api',
   tokenKey: 'a2d186f57f1fc01ffcb0b4bc1e53d8e34c921cbeab3f7a44',
+  // Google Drive sync (optional until set — see README for setup steps)
+  google: {
+    clientId: '' // OAuth Client ID (Web application) from Google Cloud Console
+  },
   apps: {
     mgm: [
       { icon: '📺', name: 'Office TV Dashboard', url: 'http://101.32.243.8:3050/', desc: 'Live ops floor view' },

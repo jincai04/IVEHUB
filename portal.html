@@ -1,31 +1,75 @@
 <!doctype html><html><head><meta charset="utf-8"><title>IVEHUB</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="config.js"></script>
+<script src="gdrive.js"></script>
 <style>
  *{box-sizing:border-box}
- body{font-family:'Segoe UI',system-ui,sans-serif;background:#070b14;color:#e8edf5;margin:0;min-height:100vh;overflow-x:hidden}
- .bg{position:fixed;inset:0;z-index:0;overflow:hidden}
- .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:drift 22s ease-in-out infinite alternate}
+ body{font-family:'Segoe UI',system-ui,sans-serif;background:#070b14;color:#e8edf5;margin:0;min-height:100vh}
+ .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
+ .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:drift 22s ease-in-out infinite alternate}
  .orb.a{width:520px;height:520px;background:#0ea5e9;top:-160px;left:-120px}
  .orb.b{width:460px;height:460px;background:#6366f1;bottom:-140px;right:-100px;animation-delay:-7s}
- .orb.c{width:340px;height:340px;background:#10b981;top:40%;left:55%;animation-delay:-14s;opacity:.22}
+ .orb.c{width:340px;height:340px;background:#10b981;top:40%;left:55%;animation-delay:-14s;opacity:.18}
  @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,40px) scale(1.12)}100%{transform:translate(-40px,70px) scale(.95)}}
- .wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:48px 24px 60px}
- header{text-align:center;margin-bottom:36px;animation:fadeDown .8s ease both}
- .logo{width:76px;height:76px;border-radius:20px;overflow:hidden;margin:0 auto 12px;border:2px solid rgba(125,211,252,.7);box-shadow:0 12px 36px rgba(14,165,233,.4)}
+ .glass{background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.09);border-radius:16px}
+ /* ---------- layout ---------- */
+ .sidebar{position:fixed;top:0;left:0;bottom:0;width:236px;z-index:20;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(10,16,30,.92),rgba(7,11,20,.96));backdrop-filter:blur(18px);border-right:1px solid rgba(255,255,255,.08);transition:transform .3s cubic-bezier(.22,1,.36,1)}
+ .brandrow{display:flex;align-items:center;gap:12px;padding:20px 18px 14px}
+ .logo{width:44px;height:44px;border-radius:13px;overflow:hidden;flex:none;border:1.5px solid rgba(125,211,252,.6);box-shadow:0 8px 24px rgba(14,165,233,.35)}
  .logo img{width:100%;height:100%;object-fit:cover}
- .brand{font-size:2.2rem;font-weight:800;letter-spacing:3px;background:linear-gradient(90deg,#7dd3fc,#a5b4fc,#6ee7b7,#7dd3fc);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
+ .brandname{font-weight:800;letter-spacing:2px;font-size:1.05rem;background:linear-gradient(90deg,#7dd3fc,#a5b4fc,#6ee7b7,#7dd3fc);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
  @keyframes shine{to{background-position:300% 0}}
- .tag{color:#8aa0b8;font-size:.85rem;letter-spacing:4px;text-transform:uppercase;margin-top:6px}
- h2{font-size:.8rem;color:#7c96b4;margin:34px 0 16px;letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:12px;animation:fadeUp .8s ease both}
- h2::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(125,211,252,.35),transparent)}
- .glass{background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.09);border-radius:18px}
+ .nav{flex:1;overflow-y:auto;padding:4px 10px 12px}
+ .nav::-webkit-scrollbar{width:4px}.nav::-webkit-scrollbar-thumb{background:rgba(125,211,252,.25);border-radius:4px}
+ .navsec{margin-top:12px}
+ .navsec>a{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:10px;color:#c7d4e4;font-weight:700;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none}
+ .navsub a{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 26px;margin:1px 0;border-radius:9px;color:#8aa0b8;font-size:.8rem;text-decoration:none;transition:all .2s;border-left:2px solid transparent}
+ .navsub a:hover{color:#c7d4e4;background:rgba(255,255,255,.04)}
+ .navsub a.active{color:#7dd3fc;background:rgba(56,189,248,.1);border-left-color:#38bdf8}
+ .sidefoot{padding:14px;border-top:1px solid rgba(255,255,255,.08)}
+ .drivebtn{width:100%;display:flex;align-items:center;gap:8px;justify-content:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#c7d4e4;padding:9px 10px;border-radius:11px;font-size:.72rem;letter-spacing:.5px;cursor:pointer;transition:all .25s}
+ .drivebtn:hover{border-color:rgba(125,211,252,.4);color:#7dd3fc}
+ .drivebtn.on{border-color:rgba(74,222,128,.4);color:#4ade80}
+ .drivebtn .dot{width:7px;height:7px;border-radius:50%;background:#5b7189;flex:none}
+ .drivebtn.on .dot{background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.8)}
+ .drivemeta{color:#5b7189;font-size:.62rem;text-align:center;margin-top:6px}
+ .main{position:relative;z-index:1;margin-left:236px;min-height:100vh;padding:26px 30px 60px;max-width:1200px}
+ .topbar{position:fixed;top:16px;right:22px;z-index:15;display:flex;gap:10px}
+ .btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;padding:8px 16px;border-radius:12px;font-size:.75rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-block}
+ .btn:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#f87171}
+ .burger{display:none;position:fixed;top:14px;left:14px;z-index:30;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;width:40px;height:40px;border-radius:12px;font-size:1rem;cursor:pointer}
+ .scrim{display:none;position:fixed;inset:0;z-index:19;background:rgba(4,8,18,.6);backdrop-filter:blur(4px)}
+ /* ---------- page furniture ---------- */
+ .ph{margin-bottom:20px;animation:fadeUp .5s ease both}
+ .ph h1{font-size:1.45rem;font-weight:800;letter-spacing:1px;margin:0}
+ .ph .sub{color:#8aa0b8;font-size:.8rem;margin-top:4px}
+ .tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+ .search{flex:1;min-width:180px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#e8edf5;padding:9px 14px;border-radius:12px;font-size:.85rem;outline:none;font-family:inherit}
+ .search:focus{border-color:rgba(125,211,252,.5)}
+ .addbtn{background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.4);color:#7dd3fc;padding:9px 16px;border-radius:12px;font-size:.78rem;letter-spacing:1px;cursor:pointer;transition:all .25s}
+ .addbtn:hover{background:rgba(56,189,248,.25)}
+ /* ---------- cards / grids ---------- */
+ .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:13px}
+ .acard{display:flex;align-items:center;gap:12px;padding:15px 16px;transition:transform .25s,border-color .25s;animation:fadeUp .5s ease both}
+ .acard:hover{transform:translateY(-3px);border-color:rgba(125,211,252,.4)}
+ .applink{display:flex;align-items:center;gap:12px;text-decoration:none;color:inherit;flex:1;min-width:0}
+ .ico{font-size:1.5rem;flex:none;filter:drop-shadow(0 4px 10px rgba(0,0,0,.4))}
+ .txt{flex:1;min-width:0}
+ .nm{display:block;font-weight:650;font-size:.93rem;color:#eef4fb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .desc{display:block;color:#8aa0b8;font-size:.74rem;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+ .acts{display:flex;gap:4px;flex:none}
+ .abtn{background:none;border:none;color:#5b7189;font-size:.9rem;cursor:pointer;padding:4px 5px;border-radius:8px;transition:all .2s}
+ .abtn:hover{background:rgba(255,255,255,.07);color:#c7d4e4}
+ .abtn.fav.on{color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,.5)}
+ .abtn.del:hover{color:#f87171}
+ .empty{color:#5b7189;font-size:.85rem;padding:40px 20px;text-align:center;border:1px dashed rgba(255,255,255,.1);border-radius:16px}
+ /* ---------- usage ---------- */
  .usage{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
- .card{padding:24px 26px;position:relative;overflow:hidden;animation:fadeUp .8s ease both}
+ .card{padding:22px 24px;position:relative;overflow:hidden}
  .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--glow,#4ade80),transparent);opacity:.8}
  .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
- .label{font-weight:600;font-size:.98rem;color:#c7d4e4}
- .pct{font-size:2.2rem;font-weight:800;font-variant-numeric:tabular-nums}
+ .label{font-weight:600;font-size:.95rem;color:#c7d4e4}
+ .pct{font-size:2rem;font-weight:800;font-variant-numeric:tabular-nums}
  .pct.ok{color:#4ade80;text-shadow:0 0 18px rgba(74,222,128,.4)}
  .pct.warn{color:#fbbf24;text-shadow:0 0 18px rgba(251,191,36,.4)}
  .pct.danger{color:#f87171;text-shadow:0 0 18px rgba(248,113,113,.45)}
@@ -34,163 +78,329 @@
  .fill.ok{background:linear-gradient(90deg,#22c55e,#4ade80);box-shadow:0 0 14px rgba(74,222,128,.5)}
  .fill.warn{background:linear-gradient(90deg,#f59e0b,#fbbf24);box-shadow:0 0 14px rgba(251,191,36,.5)}
  .fill.danger{background:linear-gradient(90deg,#ef4444,#f87171);box-shadow:0 0 16px rgba(248,113,113,.6)}
- .meta{color:#8aa0b8;font-size:.78rem;margin-top:12px}
- .planchip{display:inline-block;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;padding:2px 12px;border-radius:99px;font-size:.7rem;margin-left:8px;vertical-align:middle;letter-spacing:1px}
- .topbar{position:fixed;top:18px;right:22px;z-index:5;animation:fadeDown .8s ease both .8s}
- .btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;padding:8px 16px;border-radius:12px;font-size:.75rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-block}
- .btn:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#f87171}
- .hubs{display:flex;justify-content:center;gap:70px;flex-wrap:wrap}
- .hub-area{display:flex;flex-direction:column;align-items:center;animation:fadeUp .8s ease both}
- .hub{position:relative;width:170px;height:170px;cursor:pointer;border:none;background:none;padding:0;transition:transform .3s cubic-bezier(.22,1,.36,1)}
- .hub:hover{transform:scale(1.07)}
- .hub-tile{position:absolute;width:104px;height:104px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.7rem;letter-spacing:1px;transition:all .35s cubic-bezier(.22,1,.36,1);backdrop-filter:blur(10px)}
- .hub-tile.t1{left:0;top:14px;z-index:2;transform:rotate(-8deg)}
- .hub-tile.t2{right:0;top:14px;z-index:2;transform:rotate(8deg)}
- .hub-tile.front{left:50%;top:50%;z-index:3;transform:translate(-50%,-50%);width:118px;height:118px;border-radius:28px;font-size:2rem}
- .hub.mgm .t1,.hub.mgm .t2{color:#7dd3fc;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(56,189,248,.55);box-shadow:0 10px 40px rgba(14,165,233,.28)}
- .hub.mgm .front{background:linear-gradient(145deg,#0c4a6e,#0891b2);border:2px solid rgba(125,211,252,.8);box-shadow:0 14px 48px rgba(14,165,233,.45)}
- .hub.lunar .t1,.hub.lunar .t2{color:#c4b5fd;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(167,139,250,.55);box-shadow:0 10px 40px rgba(139,92,246,.28)}
- .hub.lunar .front{background:linear-gradient(145deg,#4c1d95,#7c3aed);border:2px solid rgba(196,181,253,.8);box-shadow:0 14px 48px rgba(139,92,246,.45);font-size:1.3rem}
- .hub.db .t1,.hub.db .t2{color:#6ee7b7;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(52,211,153,.55);box-shadow:0 10px 40px rgba(16,185,129,.28)}
- .hub.db .front{background:linear-gradient(145deg,#064e3b,#059669);border:2px solid rgba(110,231,183,.8);box-shadow:0 14px 48px rgba(16,185,129,.45)}
- .hub.modu .t1,.hub.modu .t2{color:#fcd34d;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(251,191,36,.55);box-shadow:0 10px 40px rgba(245,158,11,.28)}
- .hub.modu .front{background:linear-gradient(145deg,#7c2d12,#ea580c);border:2px solid rgba(252,211,77,.8);box-shadow:0 14px 48px rgba(245,158,11,.45);font-size:1.55rem}
- .hub:hover .t1{transform:rotate(-16deg) translate(-14px,2px)}
- .hub:hover .t2{transform:rotate(16deg) translate(14px,2px)}
- .ring{position:absolute;inset:-16px;border-radius:50%;border:1px dashed rgba(56,189,248,.35);animation:spin 14s linear infinite}
- @keyframes spin{to{transform:rotate(360deg)}}
- .hub-label{margin-top:16px;color:#a8bdd2;font-weight:700;letter-spacing:3px;font-size:.95rem;text-transform:uppercase;text-align:center}
- .hub-hint{color:#5b7189;font-size:.7rem;margin-top:4px}
- .overlay{position:fixed;inset:0;z-index:10;background:rgba(4,8,18,.82);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s}
- .overlay.open{opacity:1;pointer-events:auto}
- .panel{width:min(940px,92vw);max-height:86vh;overflow:auto;padding:30px;transform:translateY(26px) scale(.96);transition:transform .4s cubic-bezier(.22,1,.36,1)}
- .overlay.open .panel{transform:none}
- .panel-head{display:flex;align-items:center;gap:16px;margin-bottom:22px}
- .panel-badge{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem;flex:none}
- .panel-badge.mgm{color:#7dd3fc;background:linear-gradient(145deg,#0c4a6e,#0891b2);border:1.5px solid rgba(125,211,252,.7)}
- .panel-badge.lunar{color:#ddd6fe;background:linear-gradient(145deg,#4c1d95,#7c3aed);border:1.5px solid rgba(196,181,253,.7);font-size:.7rem}
- .panel-badge.db{color:#d1fae5;background:linear-gradient(145deg,#064e3b,#059669);border:1.5px solid rgba(110,231,183,.7)}
- .panel-badge.modu{color:#fde68a;background:linear-gradient(145deg,#7c2d12,#ea580c);border:1.5px solid rgba(252,211,77,.7);font-size:.85rem}
- .panel-title{font-size:1.15rem;font-weight:750;letter-spacing:1px}
- .panel-sub{color:#8aa0b8;font-size:.74rem;margin-top:3px}
- .close{margin-left:auto;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;width:38px;height:38px;border-radius:12px;font-size:1rem;cursor:pointer}
- .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px}
- .app{display:flex;align-items:center;gap:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:transform .25s,border-color .25s,box-shadow .25s}
- .app:hover{transform:translateY(-3px);border-color:rgba(125,211,252,.5);box-shadow:0 14px 34px rgba(2,8,23,.6)}
- .ico{font-size:1.5rem;flex:none}
- .txt{flex:1;min-width:0}
- .nm{display:block;font-weight:650;font-size:.95rem;color:#eef4fb}
- .desc{display:block;color:#8aa0b8;font-size:.75rem;margin-top:3px}
- .arrow{color:#38bdf8;transform:translateX(-6px);opacity:0;transition:all .25s}
- .app:hover .arrow{transform:none;opacity:1}
- .hclear{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#8aa0b8;padding:5px 12px;border-radius:10px;font-size:.68rem;letter-spacing:1px;cursor:pointer;transition:all .25s}
- .hclear:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#f87171}
- .history{display:flex;flex-wrap:wrap;gap:12px}
+ .meta{color:#8aa0b8;font-size:.76rem;margin-top:12px}
+ .planchip{display:inline-block;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;padding:2px 12px;border-radius:99px;font-size:.68rem;margin-left:8px;vertical-align:middle;letter-spacing:1px}
+ /* ---------- misc views ---------- */
+ .h2{font-size:.75rem;color:#7c96b4;margin:26px 0 12px;letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:12px}
+ .h2::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(125,211,252,.35),transparent)}
  .hchip{display:flex;align-items:center;gap:10px;padding:11px 16px;text-decoration:none;color:inherit;transition:transform .25s,border-color .25s}
  .hchip:hover{transform:translateY(-3px);border-color:rgba(125,211,252,.5)}
- .hchip .hico{font-size:1.25rem;flex:none}
- .hchip .hn{display:block;font-weight:650;font-size:.85rem;color:#eef4fb}
- .hchip .ht{display:block;color:#5b7189;font-size:.65rem;margin-top:2px}
- footer{text-align:center;color:#46586e;font-size:.7rem;margin-top:52px;letter-spacing:1px}
- @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
- @keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+ .hchip .hn{font-weight:650;font-size:.85rem;color:#eef4fb;display:block}
+ .hchip .ht{color:#5b7189;font-size:.65rem;display:block;margin-top:2px}
+ .hflex{display:flex;flex-wrap:wrap;gap:12px}
+ .clock{font-size:3.4rem;font-weight:800;letter-spacing:2px;font-variant-numeric:tabular-nums;color:#e8edf5;text-shadow:0 0 30px rgba(125,211,252,.3)}
+ .greet{color:#8aa0b8;font-size:.95rem;margin-top:6px}
+ .placeholder{padding:60px 30px;text-align:center;color:#5b7189}
+ .placeholder .big{font-size:2.4rem;margin-bottom:12px}
+ /* ---------- modal ---------- */
+ .overlay{position:fixed;inset:0;z-index:40;background:rgba(4,8,18,.82);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .3s}
+ .overlay.open{opacity:1;pointer-events:auto}
+ .panel{width:min(480px,92vw);max-height:88vh;overflow:auto;padding:26px;transform:translateY(20px) scale(.97);transition:transform .35s cubic-bezier(.22,1,.36,1)}
+ .overlay.open .panel{transform:none}
+ .panel h3{margin:0 0 18px;font-size:1.05rem;letter-spacing:1px}
+ .field{margin-bottom:14px}
+ .field label{display:block;color:#8aa0b8;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
+ .field input,.field select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#e8edf5;padding:10px 12px;border-radius:11px;font-size:.88rem;outline:none;font-family:inherit}
+ .field input:focus,.field select:focus{border-color:rgba(125,211,252,.5)}
+ .macts{display:flex;gap:10px;margin-top:20px}
+ .mbtn{flex:1;padding:11px;border-radius:12px;font-size:.82rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#c7d4e4;transition:all .25s}
+ .mbtn.primary{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.45);color:#7dd3fc}
+ .mbtn.primary:hover{background:rgba(56,189,248,.28)}
+ .mbtn.danger{border-color:rgba(248,113,113,.35);color:#f87171}
+ .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:50;background:rgba(10,16,30,.95);border:1px solid rgba(125,211,252,.35);color:#c7d4e4;padding:12px 22px;border-radius:14px;font-size:.82rem;box-shadow:0 18px 50px rgba(2,8,23,.7);transition:transform .4s cubic-bezier(.22,1,.36,1);max-width:88vw}
+ .toast.show{transform:translateX(-50%) translateY(0)}
+ .toast.err{border-color:rgba(248,113,113,.45)}
+ @keyframes fadeUp{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+ @media (max-width:900px){
+  .sidebar{transform:translateX(-105%)}
+  .sidebar.open{transform:none;box-shadow:30px 0 80px rgba(2,8,23,.8)}
+  .scrim.show{display:block}
+  .main{margin-left:0;padding:70px 16px 50px}
+  .burger{display:block}
+ }
 </style></head><body>
 <div class="bg"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+<button class="burger" id="burger">☰</button>
+<div class="scrim" id="scrim"></div>
+<aside class="sidebar" id="sidebar">
+ <div class="brandrow"><div class="logo"><img src="logo.png" alt="IVEHUB"></div><div class="brandname">IVEHUB</div></div>
+ <nav class="nav" id="nav"></nav>
+ <div class="sidefoot">
+  <button class="drivebtn" id="drivebtn"><span class="dot"></span><span id="drivelabel">☁ Connect Drive</span></button>
+  <div class="drivemeta" id="drivemeta">local storage only</div>
+ </div>
+</aside>
 <div class="topbar"><a class="btn" href="index.html" onclick="sessionStorage.removeItem('ivehub_auth')">LOCK ⬦</a></div>
-<div class="wrap">
- <header>
-  <div class="logo"><img src="logo.png" alt="IVEHUB"></div>
-  <div class="brand">IVEHUB</div>
-  <div class="tag">Operations Control Portal</div>
- </header>
-
- <h2>⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span></h2>
- <div class="usage" id="cards"><div class="glass card" style="color:#8aa0b8" id="usageLoading">loading…</div></div>
-
- <div id="histWrap" style="display:none">
-  <h2>🕘 Recently Opened <button class="hclear" id="hclear">CLEAR</button></h2>
-  <div class="history" id="history"></div>
- </div>
-
- <h2>📁 Applications</h2>
- <div class="hubs">
-  <div class="hub-area">
-   <button class="hub mgm" data-ov="ovMgm"><span class="ring"></span><span class="hub-tile t1"></span><span class="hub-tile t2"></span><span class="hub-tile front">MGM</span></button>
-   <div class="hub-label">MGM Apps</div><div class="hub-hint" id="cnt-mgm"></div>
-  </div>
-  <div class="hub-area">
-   <button class="hub lunar" data-ov="ovLunar"><span class="ring"></span><span class="hub-tile t1"></span><span class="hub-tile t2"></span><span class="hub-tile front">LUNAR</span></button>
-   <div class="hub-label">Lunar Apps</div><div class="hub-hint" id="cnt-lunar"></div>
-  </div>
-  <div class="hub-area">
-   <button class="hub db" data-ov="ovDb"><span class="ring"></span><span class="hub-tile t1"></span><span class="hub-tile t2"></span><span class="hub-tile front">🗄️</span></button>
-   <div class="hub-label">Databases</div><div class="hub-hint" id="cnt-db"></div>
-  </div>
-  <div class="hub-area">
-   <button class="hub modu" data-ov="ovModu"><span class="ring"></span><span class="hub-tile t1"></span><span class="hub-tile t2"></span><span class="hub-tile front">MODU</span></button>
-   <div class="hub-label">MODU Apps</div><div class="hub-hint" id="cnt-modu"></div>
-  </div>
- </div>
- <footer>IVEHUB · <span id="updated"></span></footer>
-</div>
-<div class="overlay" id="ovMgm"><div class="glass panel"><div class="panel-head"><div class="panel-badge mgm">MGM</div><div><div class="panel-title">MGM Applications</div><div class="panel-sub" id="sub-mgm"></div></div><button class="close" onclick="closeOv()">✕</button></div><div class="apps" id="apps-mgm"></div></div></div>
-<div class="overlay" id="ovLunar"><div class="glass panel"><div class="panel-head"><div class="panel-badge lunar">LUNAR</div><div><div class="panel-title">Lunar Applications</div><div class="panel-sub" id="sub-lunar"></div></div><button class="close" onclick="closeOv()">✕</button></div><div class="apps" id="apps-lunar"></div></div></div>
-<div class="overlay" id="ovDb"><div class="glass panel"><div class="panel-head"><div class="panel-badge db">🗄️</div><div><div class="panel-title">Databases</div><div class="panel-sub" id="sub-db"></div></div><button class="close" onclick="closeOv()">✕</button></div><div class="apps" id="apps-db"></div></div></div>
-<div class="overlay" id="ovModu"><div class="glass panel"><div class="panel-head"><div class="panel-badge modu">MODU</div><div><div class="panel-title">MODU Applications</div><div class="panel-sub" id="sub-modu"></div></div><button class="close" onclick="closeOv()">✕</button></div><div class="apps" id="apps-modu"></div></div></div>
+<main class="main"><div id="view"></div></main>
+<div class="overlay" id="modal"><div class="glass panel" id="modalbody"></div></div>
+<div class="toast" id="toast"></div>
 <script>
 if (!sessionStorage.getItem('ivehub_auth')) location.href = 'index.html';
-const APPS = (window.IVEHUB_CONFIG && window.IVEHUB_CONFIG.apps) || {};
-const TOKEN_API = (window.IVEHUB_CONFIG && window.IVEHUB_CONFIG.tokenApi) || 'http://127.0.0.1:3008';
-const TOKEN_KEY = (window.IVEHUB_CONFIG && window.IVEHUB_CONFIG.tokenKey) || '';
-function card(apps, key){
-  const el = document.getElementById('apps-'+key);
-  el.innerHTML = apps.map(a => `<a class="app glass" href="${a.url}" target="_blank" rel="noopener"><span class="ico">${a.icon}</span><span class="txt"><span class="nm">${a.name}</span><span class="desc">${a.desc}</span></span><span class="arrow">→</span></a>`).join('');
-  document.getElementById('sub-'+key).textContent = apps.length + ' apps · click any to open';
-  document.getElementById('cnt-'+key).textContent = apps.length + ' inside';
+
+const CFG = window.IVEHUB_CONFIG || {};
+const TOKEN_API = CFG.tokenApi || '';
+const TOKEN_KEY = CFG.tokenKey || '';
+const D = () => IVEDB.data();
+
+/* ---------------- navigation ---------------- */
+const NAV = [
+ {id:'home', icon:'🏠', label:'Home', subs:[['dashboard','My Dashboard'],['quick','Quick Access'],['recent','Recently Used'],['today','Today']]},
+ {id:'apps', icon:'📁', label:'Applications', subs:[['business','Business Apps'],['databases','Databases'],['personal','Personal Apps'],['development','Development Apps'],['favorites','Favorites']]},
+ {id:'projects', icon:'🚀', label:'Projects', subs:[['active','Active Projects'],['completed','Completed Projects'],['history','Project History']], phase:2},
+ {id:'brain', icon:'🧠', label:'My Brain', subs:[['notes','Notes'],['ideas','Ideas'],['knowledge','Knowledge'],['bookmarks','Bookmarks']], phase:2},
+ {id:'tech', icon:'🖥️', label:'My Tech', subs:[['servers','Servers'],['domains','Domains'],['devices','Devices'],['tools','Tools']], phase:3},
+ {id:'life', icon:'🌱', label:'My Life', subs:[['goals','Goals'],['timeline','Timeline'],['records','Personal Records']], phase:3},
+ {id:'settings', icon:'⚙️', label:'Settings', subs:[['appearance','Appearance'],['dashboard','Dashboard Customization'],['appmgmt','App Management']], phase:3}
+];
+const CATS = { business:'Business Apps', databases:'Databases', personal:'Personal Apps', development:'Development Apps' };
+
+function buildNav(){
+ document.getElementById('nav').innerHTML = NAV.map(s =>
+  `<div class="navsec"><a href="#/${s.id}/${s.subs[0][0]}">${s.icon} ${s.label}${s.phase?` <span style="font-size:.55rem;color:#5b7189;letter-spacing:0">P${s.phase}</span>`:''}</a>
+   <div class="navsub">${s.subs.map(([id,lb]) => `<a href="#/${s.id}/${id}" data-route="${s.id}/${id}">${lb}</a>`).join('')}</div></div>`
+ ).join('');
 }
-card(APPS.mgm||[], 'mgm'); card(APPS.lunar||[], 'lunar'); card(APPS.db||[], 'db'); card(APPS.modu||[], 'modu');
-document.querySelectorAll('.hub').forEach(h => h.addEventListener('click', () => document.getElementById(h.dataset.ov).classList.add('open')));
-function closeOv(){ document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
-document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) closeOv(); }));
-document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOv(); });
-// ---- recently opened history (localStorage) ----
+function route(){
+ const h = location.hash.replace(/^#\/?/, '') || 'home/dashboard';
+ const [sec, sub] = h.split('/');
+ return {sec, sub: sub || ''};
+}
+
+/* ---------------- helpers ---------------- */
+function esc(s){ return String(s==null?'':s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function toast(msg, err){
+ const t = document.getElementById('toast');
+ t.textContent = msg; t.className = 'toast show' + (err ? ' err' : '');
+ clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('show'), err ? 5200 : 2800);
+}
+function ph(title, sub, phase){ return `<div class="ph"><h1>${esc(title)}</h1><div class="sub">${esc(sub||'')}</div></div><div class="placeholder glass"><div class="big">🚧</div>Planned for Phase ${phase} — the structure is ready, this page arrives in the next build.</div>`; }
+function isFav(url){ return D().favorites.indexOf(url) >= 0; }
+
+/* ---------------- recently used (localStorage) ---------------- */
 const HKEY = 'ivehub_history';
 function loadH(){ try { return JSON.parse(localStorage.getItem(HKEY)) || []; } catch(e){ return []; } }
 function saveH(h){ try { localStorage.setItem(HKEY, JSON.stringify(h)); } catch(e){} }
 function ago(ts){ const s=(Date.now()-ts)/1000; if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
-function renderH(){
-  const h = loadH(), w = document.getElementById('histWrap'), el = document.getElementById('history');
-  if (!h.length) { w.style.display = 'none'; return; }
-  w.style.display = '';
-  el.innerHTML = h.map(a => `<a class="glass hchip" href="${a.url}" target="_blank" rel="noopener"><span class="hico">${a.icon}</span><span><span class="hn">${a.name}</span><span class="ht">${ago(a.ts)}</span></span></a>`).join('');
-}
 document.addEventListener('click', e => {
-  const a = e.target.closest('a.app'); if (!a) return;
-  const nm = a.querySelector('.nm'), ic = a.querySelector('.ico');
-  const h = loadH().filter(x => x.url !== a.href);
-  h.unshift({ name: nm ? nm.textContent : '?', icon: ic ? ic.textContent : '', url: a.href, ts: Date.now() });
-  saveH(h.slice(0, 8)); renderH();
+ const a = e.target.closest ? e.target.closest('a.applink') : null; if (!a) return;
+ const card = a.closest('.acard');
+ const h = loadH().filter(x => x.url !== a.href);
+ h.unshift({ name: a.querySelector('.nm').textContent, icon: a.querySelector('.ico').textContent, url: a.href, ts: Date.now() });
+ saveH(h.slice(0, 8));
+ if (document.getElementById('recentchips')) renderRecentChips();
 });
-document.getElementById('hclear').addEventListener('click', () => { try { localStorage.removeItem(HKEY); } catch(e){} renderH(); });
-renderH();
-async function refresh(){
-  try {
-    const r = await fetch(TOKEN_API + '/api/usage', { headers: { 'x-api-key': TOKEN_KEY } });
-    const d = await r.json();
-    if (d.error) throw new Error(d.error);
-    document.getElementById('plan').textContent = (d.plan||'').toUpperCase();
-    const el = document.getElementById('cards'); el.innerHTML = '';
-    for (const w of d.windows || []) {
-      const p = w.percent, cls = p>=80?'danger':p>=50?'warn':'ok';
-      const glow = p>=80?'#f87171':p>=50?'#fbbf24':'#4ade80';
-      const label = w.type==='TOKENS_LIMIT' ? ('5-Hour Window ('+(w.hours||5)+'h)') : 'Monthly Quota';
-      const reset = w.resetMs ? new Date(w.resetMs).toLocaleString('en-MY',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '?';
-      el.innerHTML += `<div class="glass card" style="--glow:${glow}"><div class="row"><span class="label">${label}</span><span class="pct ${cls}">${p}%</span></div><div class="bar"><div class="fill ${cls}" style="width:${p}%"></div></div><div class="meta">resets ${reset}</div></div>`;
-    }
-    document.getElementById('updated').textContent = 'usage synced ' + new Date().toLocaleTimeString('en-MY');
-  } catch(e) {
-    document.getElementById('usageLoading').innerHTML = '⚠ Token API unreachable (' + (TOKEN_API==='' ? 'not configured' : TOKEN_API) + ') — set it in config.js. ' + e.message;
+function chipHtml(a){ return `<a class="glass hchip" href="${esc(a.url)}" target="_blank" rel="noopener"><span style="font-size:1.25rem">${a.icon}</span><span><span class="hn">${esc(a.name)}</span><span class="ht">${ago(a.ts)}</span></span></a>`; }
+function renderRecentChips(){ document.getElementById('recentchips').innerHTML = loadH().map(chipHtml).join('') || '<div class="empty" style="flex:1">Nothing yet — open a few apps and they will show up here.</div>'; }
+
+/* ---------------- token usage ---------------- */
+let usageTimer = null;
+async function loadUsage(){
+ const el = document.getElementById('usagecards'); if (!el) return;
+ try {
+  const r = await fetch(TOKEN_API + '/api/usage', { headers: { 'x-api-key': TOKEN_KEY } });
+  const d = await r.json();
+  if (d.error) throw new Error(d.error);
+  const plan = document.getElementById('plan'); if (plan) plan.textContent = (d.plan||'').toUpperCase();
+  el.innerHTML = '';
+  for (const w of d.windows || []) {
+   const p = w.percent, cls = p>=80?'danger':p>=50?'warn':'ok';
+   const glow = p>=80?'#f87171':p>=50?'#fbbf24':'#4ade80';
+   const label = w.type==='TOKENS_LIMIT' ? ('5-Hour Window ('+(w.hours||5)+'h)') : 'Monthly Quota';
+   const reset = w.resetMs ? new Date(w.resetMs).toLocaleString('en-MY',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '?';
+   el.innerHTML += `<div class="glass card" style="--glow:${glow}"><div class="row"><span class="label">${label}</span><span class="pct ${cls}">${p}%</span></div><div class="bar"><div class="fill ${cls}" style="width:${p}%"></div></div><div class="meta">resets ${reset}</div></div>`;
   }
+ } catch(e) {
+  el.innerHTML = `<div class="glass card" style="color:#8aa0b8">⚠ Token API unreachable${TOKEN_API===''?' (not configured in config.js)':''} — ${esc(e.message)}</div>`;
+ }
 }
-refresh(); setInterval(() => { refresh(); renderH(); }, 60000);
+
+/* ---------------- views ---------------- */
+const VIEWS = {
+ 'home/dashboard'(){
+  const favs = favApps().slice(0,6), rec = loadH().slice(0,4);
+  const hr = new Date().getHours();
+  const greet = hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
+  return `<div class="ph"><h1>My Dashboard</h1><div class="sub">${greet}, Boss — ${new Date().toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div>
+  <div class="h2">⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span></div>
+  <div class="usage" id="usagecards"><div class="glass card" style="color:#8aa0b8">loading…</div></div>
+  ${favs.length?`<div class="h2">⭐ Quick Access</div><div class="hflex">${favs.map(a=>chipHtml({icon:a.icon,name:a.name,url:a.url,ts:Date.now()})).join('').replaceAll("just now",'favorite')}</div>`:''}
+  ${rec.length?`<div class="h2">🕘 Recently Opened</div><div class="hflex">${rec.map(chipHtml).join('')}</div>`:''}`;
+ },
+ 'home/quick'(){
+  const favs = favApps();
+  return `<div class="ph"><h1>Quick Access</h1><div class="sub">Your starred apps, one click away</div></div>
+  <div class="hflex">${favs.length ? favs.map(a=>chipHtml({icon:a.icon,name:a.name,url:a.url,ts:Date.now()})).join('').replaceAll("just now",'favorite') : '<div class="empty" style="flex:1">No favorites yet — star apps (★) in Applications to pin them here.</div>'}</div>`;
+ },
+ 'home/recent'(){
+  return `<div class="ph"><h1>Recently Used</h1><div class="sub">Last 8 apps opened on this device</div></div>
+  <div class="hflex" id="recentchips"></div>
+  <div style="margin-top:18px"><button class="btn" id="clearh">CLEAR HISTORY</button></div>`;
+ },
+ 'home/today'(){
+  return `<div class="ph"><h1>Today</h1><div class="sub">The big picture for today</div></div>
+  <div class="glass card" style="padding:40px;text-align:center">
+   <div class="clock" id="clock">--:--:--</div>
+   <div class="greet" id="dateline"></div>
+  </div>
+  <div class="h2">📅 Timeline</div>
+  <div class="placeholder glass" style="padding:30px">Timeline entries for today will appear here once My Life → Timeline lands (Phase 3).</div>`;
+ },
+ 'apps/favorites'(){
+  const favs = favApps();
+  return `<div class="ph"><h1>Favorites</h1><div class="sub">Starred apps from every category</div></div>
+  <div class="grid">${favs.length ? favs.map(a => appCard(a, catOf(a))).join('') : '<div class="empty" style="grid-column:1/-1">Nothing starred yet — open a category and tap ★ on any app.</div>'}</div>`;
+ }
+};
+for (const [cid, clabel] of Object.entries(CATS)) {
+ VIEWS['apps/' + cid] = () => {
+  const list = D().apps[cid] || [];
+  return `<div class="ph"><h1>${clabel}</h1><div class="sub">${list.length} app${list.length===1?'':'s'} · click any to open</div></div>
+  <div class="tools"><input class="search" id="appsearch" placeholder="Search ${clabel.toLowerCase()}…"><button class="addbtn" data-add="${cid}">＋ ADD APP</button></div>
+  <div class="grid" id="appgrid">${list.map(a => appCard(a, cid)).join('') || '<div class="empty" style="grid-column:1/-1">No apps here yet — click ＋ ADD APP.</div>'}</div>`;
+ };
+}
+function allApps(){ const out=[]; for (const c of Object.keys(CATS)) for (const a of D().apps[c]||[]) out.push(a); return out; }
+function catOf(app){ for (const c of Object.keys(CATS)) if ((D().apps[c]||[]).some(x => x.id === app.id)) return c; return 'personal'; }
+function favApps(){ const f = D().favorites; return allApps().filter(a => f.indexOf(a.url) >= 0); }
+function appCard(a, cat){
+ const fav = isFav(a.url);
+ return `<div class="glass acard" data-id="${esc(a.id)}" data-cat="${cat}">
+  <a class="applink" href="${esc(a.url)}" target="_blank" rel="noopener"><span class="ico">${a.icon||'🔗'}</span><span class="txt"><span class="nm">${esc(a.name)}</span><span class="desc">${esc(a.desc||'')}</span></span></a>
+  <div class="acts">
+   <button class="abtn fav${fav?' on':''}" data-act="fav" title="Favorite">★</button>
+   <button class="abtn" data-act="edit" title="Edit">✎</button>
+   <button class="abtn del" data-act="del" title="Remove">🗑</button>
+  </div></div>`;
+}
+
+/* ---------------- app editor modal ---------------- */
+let editing = null;
+function openEditor(cat, app){
+ editing = { cat, id: app ? app.id : null };
+ const a = app || { icon:'', name:'', url:'', desc:'' };
+ document.getElementById('modalbody').innerHTML = `
+  <h3>${app ? 'Edit App' : 'Add App'}</h3>
+  <div class="field"><label>Icon (emoji)</label><input id="f-icon" value="${esc(a.icon)}" placeholder="📊" maxlength="8"></div>
+  <div class="field"><label>Name</label><input id="f-name" value="${esc(a.name)}" placeholder="App name"></div>
+  <div class="field"><label>URL</label><input id="f-url" value="${esc(a.url)}" placeholder="https://…"></div>
+  <div class="field"><label>Description</label><input id="f-desc" value="${esc(a.desc||'')}" placeholder="What it does"></div>
+  <div class="field"><label>Category</label><select id="f-cat">${Object.entries(CATS).map(([k,v]) => `<option value="${k}"${k===cat?' selected':''}>${v}</option>`).join('')}</select></div>
+  <div class="macts"><button class="mbtn" id="m-cancel">CANCEL</button><button class="mbtn primary" id="m-save">SAVE</button></div>`;
+ document.getElementById('modal').classList.add('open');
+ document.getElementById('m-cancel').onclick = closeModal;
+ document.getElementById('m-save').onclick = saveApp;
+}
+function closeModal(){ document.getElementById('modal').classList.remove('open'); editing = null; }
+function saveApp(){
+ const icon = document.getElementById('f-icon').value.trim() || '🔗';
+ const name = document.getElementById('f-name').value.trim();
+ let url = document.getElementById('f-url').value.trim();
+ const desc = document.getElementById('f-desc').value.trim();
+ const cat = document.getElementById('f-cat').value;
+ if (!name) return toast('Give the app a name', true);
+ if (!url) return toast('Give the app a URL', true);
+ if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+ if (editing.id) {
+  const old = allApps().find(a => a.id === editing.id);
+  for (const c of Object.keys(CATS)) { const list = D().apps[c]; const i = list.findIndex(x => x.id === editing.id); if (i >= 0) list.splice(i, 1); }
+  (D().apps[cat] || (D().apps[cat] = [])).push({ id: editing.id, icon, name, url, desc });
+  if (old && old.url !== url) { const fi = D().favorites.indexOf(old.url); if (fi >= 0) { D().favorites.splice(fi,1); D().favorites.push(url); } }
+ } else {
+  (D().apps[cat] || (D().apps[cat] = [])).push({ id: IVEDB.uid(), icon, name, url, desc });
+ }
+ IVEDB.save(); closeModal(); render(); toast('Saved ✓');
+}
+
+/* ---------------- render + events ---------------- */
+function render(){
+ const {sec, sub} = route();
+ document.querySelectorAll('.navsub a').forEach(a => a.classList.toggle('active', a.dataset.route === sec+'/'+sub));
+ const fn = VIEWS[sec+'/'+sub];
+ const view = document.getElementById('view');
+ if (fn) view.innerHTML = fn(); else {
+  const s = NAV.find(x => x.id === sec);
+  const label = (s && s.subs.find(x => x[0]===sub) || [,''])[1];
+  view.innerHTML = s ? ph(label || sec, '', s.phase || 2) : ph('Page not found', '');
+ }
+ if (sec==='home' && sub==='dashboard') loadUsage();
+ if (sec==='home' && sub==='recent') { renderRecentChips(); const c = document.getElementById('clearh'); if (c) c.onclick = () => { try{localStorage.removeItem(HKEY);}catch(e){} renderRecentChips(); toast('History cleared'); }; }
+ tick();
+ document.getElementById('sidebar').classList.remove('open');
+ document.getElementById('scrim').classList.remove('show');
+}
+let clockTimer = null;
+function tick(){
+ clearInterval(clockTimer);
+ const up = () => { const c = document.getElementById('clock'); if (!c) { clearInterval(clockTimer); return; }
+  const n = new Date();
+  c.textContent = n.toLocaleTimeString('en-MY',{hour12:false});
+  document.getElementById('dateline').textContent = n.toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
+ };
+ up(); clockTimer = setInterval(up, 1000);
+}
+document.getElementById('view').addEventListener('click', e => {
+ const add = e.target.closest('[data-add]');
+ if (add) return openEditor(add.dataset.add, null);
+ const btn = e.target.closest('.abtn');
+ if (btn) {
+  const card = btn.closest('.acard');
+  const id = card.dataset.id, cat = card.dataset.cat;
+  const app = (D().apps[cat]||[]).find(a => a.id === id);
+  if (!app) return;
+  if (btn.dataset.act === 'fav') {
+   const f = D().favorites, i = f.indexOf(app.url);
+   if (i >= 0) f.splice(i,1); else f.push(app.url);
+   IVEDB.save(); render();
+  } else if (btn.dataset.act === 'edit') {
+   openEditor(cat, app);
+  } else if (btn.dataset.act === 'del') {
+   if (!confirm('Remove "' + app.name + '" from IVEHUB?')) return;
+   const list = D().apps[cat] || []; const i = list.findIndex(a => a.id === id);
+   if (i >= 0) list.splice(i,1);
+   const fi = D().favorites.indexOf(app.url); if (fi >= 0) D().favorites.splice(fi,1);
+   IVEDB.save(); render(); toast('Removed');
+  }
+  return;
+ }
+ if (e.target.id === 'modal') closeModal();
+});
+document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+document.getElementById('view').addEventListener('input', e => {
+ if (e.target.id !== 'appsearch') return;
+ const q = e.target.value.toLowerCase();
+ document.querySelectorAll('#appgrid .acard').forEach(c => {
+  const t = c.textContent.toLowerCase();
+  c.style.display = t.indexOf(q) >= 0 ? '' : 'none';
+ });
+});
+
+/* ---------------- Google Drive ---------------- */
+function driveUi(){
+ const s = IVEDB.status();
+ const btn = document.getElementById('drivebtn');
+ btn.classList.toggle('on', s.connected);
+ document.getElementById('drivelabel').textContent = s.connected ? 'Drive synced' : '☁ Connect Drive';
+ document.getElementById('drivemeta').textContent = s.connected
+  ? ('last sync ' + (s.lastSync ? new Date(s.lastSync).toLocaleTimeString('en-MY') : '…'))
+  : (s.clientIdSet ? 'tap to sync via Google Drive' : 'local storage only — set google.clientId (README)');
+}
+document.getElementById('drivebtn').onclick = async () => {
+ const s = IVEDB.status();
+ if (s.connected) {
+  if (confirm('Disconnect Google Drive? Data stays on this device (localStorage); Drive keeps its copy.')) { IVEDB.disconnect(); driveUi(); toast('Drive disconnected'); }
+  return;
+ }
+ try { await IVEDB.connect(); driveUi(); toast('Google Drive connected ✓ — data now syncs'); }
+ catch (err) { toast('Drive connect failed: ' + err.message, true); }
+};
+IVEDB.onChange(driveUi);
+
+/* ---------------- mobile + boot ---------------- */
+document.getElementById('burger').onclick = () => { document.getElementById('sidebar').classList.add('open'); document.getElementById('scrim').classList.add('show'); };
+document.getElementById('scrim').onclick = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('scrim').classList.remove('show'); };
+window.addEventListener('hashchange', render);
+buildNav();
+driveUi();
+render();
 </script></body></html>

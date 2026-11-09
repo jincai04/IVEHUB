@@ -63,6 +63,23 @@
  .abtn.fav.on{color:#fbbf24;text-shadow:0 0 10px rgba(251,191,36,.5)}
  .abtn.del:hover{color:#f87171}
  .empty{color:#5b7189;font-size:.85rem;padding:40px 20px;text-align:center;border:1px dashed rgba(255,255,255,.1);border-radius:16px}
+ /* ---------- item cards (projects / brain) ---------- */
+ .icard{padding:16px 18px;animation:fadeUp .5s ease both}
+ .icard .nm{font-weight:650;font-size:.95rem;color:#eef4fb}
+ .bodyprev{color:#8aa0b8;font-size:.78rem;margin-top:6px;white-space:pre-wrap;word-break:break-word;overflow:hidden;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical}
+ .tagchip{display:inline-block;background:rgba(167,139,250,.12);border:1px solid rgba(167,139,250,.3);color:#c4b5fd;padding:1px 9px;border-radius:99px;font-size:.62rem;margin:8px 4px 0 0}
+ .stchip{display:inline-block;padding:2px 10px;border-radius:99px;font-size:.6rem;letter-spacing:1px;flex:none}
+ .stchip.active{background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.35);color:#7dd3fc}
+ .stchip.done{background:rgba(74,222,128,.12);border:1px solid rgba(74,222,128,.35);color:#4ade80}
+ .icard-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+ .icard-meta{color:#5b7189;font-size:.68rem;margin-top:8px}
+ .acts2{display:flex;gap:4px;margin-top:10px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px}
+ .hrow{display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:8px;animation:fadeUp .4s ease both}
+ .hrow .when{color:#5b7189;font-size:.7rem;flex:none;width:72px}
+ .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+ .stat{padding:16px 22px;text-align:center;flex:1;min-width:120px}
+ .stat .n{font-size:1.7rem;font-weight:800;color:#7dd3fc}
+ .stat .l{color:#8aa0b8;font-size:.66rem;letter-spacing:1px;margin-top:4px}
  /* ---------- usage ---------- */
  .usage{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
  .card{padding:22px 24px;position:relative;overflow:hidden}
@@ -100,8 +117,9 @@
  .panel h3{margin:0 0 18px;font-size:1.05rem;letter-spacing:1px}
  .field{margin-bottom:14px}
  .field label{display:block;color:#8aa0b8;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;margin-bottom:6px}
- .field input,.field select{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#e8edf5;padding:10px 12px;border-radius:11px;font-size:.88rem;outline:none;font-family:inherit}
- .field input:focus,.field select:focus{border-color:rgba(125,211,252,.5)}
+ .field input,.field select,.field textarea{width:100%;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#e8edf5;padding:10px 12px;border-radius:11px;font-size:.88rem;outline:none;font-family:inherit}
+ .field textarea{resize:vertical;min-height:90px}
+ .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(125,211,252,.5)}
  .macts{display:flex;gap:10px;margin-top:20px}
  .mbtn{flex:1;padding:11px;border-radius:12px;font-size:.82rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#c7d4e4;transition:all .25s}
  .mbtn.primary{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.45);color:#7dd3fc}
@@ -146,8 +164,8 @@ const D = () => IVEDB.data();
 const NAV = [
  {id:'home', icon:'🏠', label:'Home', subs:[['dashboard','My Dashboard'],['quick','Quick Access'],['recent','Recently Used'],['today','Today']]},
  {id:'apps', icon:'📁', label:'Applications', subs:[['business','Business Apps'],['databases','Databases'],['personal','Personal Apps'],['development','Development Apps'],['favorites','Favorites']]},
- {id:'projects', icon:'🚀', label:'Projects', subs:[['active','Active Projects'],['completed','Completed Projects'],['history','Project History']], phase:2},
- {id:'brain', icon:'🧠', label:'My Brain', subs:[['notes','Notes'],['ideas','Ideas'],['knowledge','Knowledge'],['bookmarks','Bookmarks']], phase:2},
+ {id:'projects', icon:'🚀', label:'Projects', subs:[['active','Active Projects'],['completed','Completed Projects'],['history','Project History']]},
+ {id:'brain', icon:'🧠', label:'My Brain', subs:[['notes','Notes'],['ideas','Ideas'],['knowledge','Knowledge'],['bookmarks','Bookmarks']]},
  {id:'tech', icon:'🖥️', label:'My Tech', subs:[['servers','Servers'],['domains','Domains'],['devices','Devices'],['tools','Tools']], phase:3},
  {id:'life', icon:'🌱', label:'My Life', subs:[['goals','Goals'],['timeline','Timeline'],['records','Personal Records']], phase:3},
  {id:'settings', icon:'⚙️', label:'Settings', subs:[['appearance','Appearance'],['dashboard','Dashboard Customization'],['appmgmt','App Management']], phase:3}
@@ -245,6 +263,28 @@ const VIEWS = {
   <div class="h2">📅 Timeline</div>
   <div class="placeholder glass" style="padding:30px">Timeline entries for today will appear here once My Life → Timeline lands (Phase 3).</div>`;
  },
+ 'projects/active'(){
+  const list = D().projects.filter(p => p.status !== 'done').sort((a,b) => (b.updated||0)-(a.updated||0));
+  return `<div class="ph"><h1>Active Projects</h1><div class="sub">${list.length} in progress</div></div>
+  <div class="tools"><button class="addbtn" data-addproj="1">＋ NEW PROJECT</button></div>
+  <div class="grid">${list.map(projCard).join('') || '<div class="empty" style="grid-column:1/-1">No active projects — start one!</div>'}</div>`;
+ },
+ 'projects/completed'(){
+  const list = D().projects.filter(p => p.status === 'done').sort((a,b) => (b.doneAt||0)-(a.doneAt||0));
+  return `<div class="ph"><h1>Completed Projects</h1><div class="sub">${list.length} finished</div></div>
+  <div class="grid">${list.map(projCard).join('') || '<div class="empty" style="grid-column:1/-1">Nothing completed yet — mark a project ✓ done.</div>'}</div>`;
+ },
+ 'projects/history'(){
+  const act = D().projects.filter(p => p.status !== 'done').length, done = D().projects.length - act;
+  const list = [].concat(D().projects).sort((a,b) => (b.updated||0)-(a.updated||0));
+  return `<div class="ph"><h1>Project History</h1><div class="sub">Everything, most recent first</div></div>
+  <div class="stats"><div class="glass stat"><div class="n">${act}</div><div class="l">ACTIVE</div></div><div class="glass stat"><div class="n">${done}</div><div class="l">COMPLETED</div></div><div class="glass stat"><div class="n">${D().projects.length}</div><div class="l">TOTAL</div></div></div>
+  ${list.map(p => `<div class="glass hrow"><span class="when">${fmtDate(p.status==='done'?(p.doneAt||p.updated):(p.updated||0))}</span><span style="flex:1;font-weight:600;font-size:.88rem">${esc(p.title)}</span><span class="stchip ${p.status}">${p.status==='done'?'DONE':'ACTIVE'}</span></div>`).join('') || '<div class="empty">No projects yet.</div>'}`;
+ },
+ 'brain/notes': brainView('notes','Notes'),
+ 'brain/ideas': brainView('ideas','Ideas'),
+ 'brain/knowledge': brainView('knowledge','Knowledge'),
+ 'brain/bookmarks': brainView('bookmarks','Bookmarks'),
  'apps/favorites'(){
   const favs = favApps();
   return `<div class="ph"><h1>Favorites</h1><div class="sub">Starred apps from every category</div></div>
@@ -260,6 +300,89 @@ for (const [cid, clabel] of Object.entries(CATS)) {
  };
 }
 function allApps(){ const out=[]; for (const c of Object.keys(CATS)) for (const a of D().apps[c]||[]) out.push(a); return out; }
+function fmtDate(ts){ return ts ? new Date(ts).toLocaleDateString('en-MY',{day:'numeric',month:'short'}) : '?'; }
+function projCard(p){
+ const prog = p.status==='done' ? 100 : (p.progress||0);
+ return `<div class="glass icard" data-kind="project" data-id="${esc(p.id)}">
+  <div class="icard-head"><span class="nm" style="cursor:pointer" data-act="edit">${esc(p.title)}</span><span class="stchip ${p.status==='done'?'done':'active'}">${p.status==='done'?'DONE':'ACTIVE'}</span></div>
+  ${p.notes ? `<div class="bodyprev">${esc(p.notes)}</div>` : ''}
+  <div class="bar" style="margin-top:12px"><div class="fill ok" style="width:${prog}%"></div></div>
+  <div class="icard-meta">${prog}% · ${p.status==='done' ? 'completed '+fmtDate(p.doneAt) : 'updated '+ago(p.updated||0)}</div>
+  <div class="acts2">
+   ${p.status!=='done' ? `<button class="abtn" data-act="done" title="Mark complete">✓ done</button>` : `<button class="abtn" data-act="reopen" title="Reopen">↩ reopen</button>`}
+   <span style="flex:1"></span>
+   <button class="abtn" data-act="edit" title="Edit">✎</button>
+   <button class="abtn del" data-act="del" title="Delete">🗑</button>
+  </div></div>`;
+}
+function brainView(key, label){
+ return () => {
+  const list = [].concat(D().brain[key]||[]).sort((a,b) => (b.updated||0)-(a.updated||0));
+  return `<div class="ph"><h1>${label}</h1><div class="sub">${list.length} item${list.length===1?'':'s'}</div></div>
+  <div class="tools"><input class="search" id="appsearch" placeholder="Search ${label.toLowerCase()}…"><button class="addbtn" data-addbrain="${key}">＋ ADD ${label.toUpperCase()}</button></div>
+  <div class="grid" id="appgrid">${list.map(n => key==='bookmarks' ? bmCard(n) : noteCard(n, key)).join('') || `<div class="empty" style="grid-column:1/-1">Nothing here yet — click ＋ ADD ${label.toUpperCase()}.</div>`}</div>`;
+ };
+}
+function noteCard(n, key){
+ return `<div class="glass icard" data-kind="${key}" data-id="${esc(n.id)}">
+  <div class="icard-head"><span class="nm" style="cursor:pointer" data-act="edit">${esc(n.title)}</span></div>
+  ${n.body ? `<div class="bodyprev">${esc(n.body)}</div>` : ''}
+  ${key==='notes' && n.tags ? `<div>${n.tags.split(',').filter(t => t.trim()).map(t => `<span class="tagchip">${esc(t.trim())}</span>`).join('')}</div>` : ''}
+  <div class="icard-meta">updated ${ago(n.updated||0)}</div>
+  <div class="acts2"><button class="abtn" data-act="edit" title="Edit">✎</button><button class="abtn del" data-act="del" title="Delete">🗑</button></div></div>`;
+}
+function bmCard(n){
+ return `<div class="glass icard acard" data-kind="bookmarks" data-id="${esc(n.id)}">
+  <a class="applink" href="${esc(n.url)}" target="_blank" rel="noopener"><span class="ico">🔗</span><span class="txt"><span class="nm">${esc(n.title)}</span><span class="desc">${esc(n.desc||'')}</span></span></a>
+  <div class="acts"><button class="abtn" data-act="edit" title="Edit">✎</button><button class="abtn del" data-act="del" title="Delete">🗑</button></div></div>`;
+}
+
+/* ---------------- generic form modal ---------------- */
+function openForm(head, fields, values, onSave, onDelete){
+ const mb = document.getElementById('modalbody');
+ mb.innerHTML = `<h3>${esc(head)}</h3>` + fields.map(f => `<div class="field"><label>${esc(f.label)}</label>` + (f.type==='textarea'
+   ? `<textarea id="ff-${f.k}" rows="5" placeholder="${esc(f.ph||'')}">${esc(values[f.k]||'')}</textarea>`
+   : `<input id="ff-${f.k}" type="${f.type||'text'}" value="${esc(values[f.k]==null?'':values[f.k])}" placeholder="${esc(f.ph||'')}">`) + `</div>`).join('')
+  + `<div class="macts">${onDelete?'<button class="mbtn danger" id="m-del">DELETE</button>':''}<button class="mbtn" id="m-cancel">CANCEL</button><button class="mbtn primary" id="m-save">SAVE</button></div>`;
+ document.getElementById('modal').classList.add('open');
+ document.getElementById('m-cancel').onclick = closeModal;
+ if (onDelete) document.getElementById('m-del').onclick = onDelete;
+ document.getElementById('m-save').onclick = () => {
+  const vals = {}; fields.forEach(f => vals[f.k] = document.getElementById('ff-'+f.k).value.trim());
+  if (onSave(vals) !== false) closeModal();
+ };
+}
+function openProjectEditor(p){
+ openForm(p ? 'Edit Project' : 'New Project',
+  [{k:'title',label:'Title',ph:'What are you building?'},{k:'notes',label:'Notes',type:'textarea'},{k:'progress',label:'Progress % (0-100)',type:'number',ph:'0'}],
+  p || {},
+  vals => {
+   if (!vals.title) { toast('Give the project a title', true); return false; }
+   const prog = Math.max(0, Math.min(100, parseInt(vals.progress||0,10)||0));
+   if (p) Object.assign(p, {title:vals.title, notes:vals.notes, progress:prog, updated:Date.now()});
+   else D().projects.push({id:IVEDB.uid(), title:vals.title, notes:vals.notes, progress:prog, status:'active', updated:Date.now()});
+   IVEDB.save(); render(); toast('Saved ✓');
+  },
+  p ? () => { if (confirm('Delete this project?')) { D().projects = D().projects.filter(x => x.id !== p.id); IVEDB.save(); closeModal(); render(); toast('Deleted'); } } : null);
+}
+const BRAIN_LABEL = {notes:'Note', ideas:'Idea', knowledge:'Knowledge', bookmarks:'Bookmark'};
+function openBrainEditor(key, item){
+ const isBm = key === 'bookmarks';
+ const fields = isBm
+  ? [{k:'title',label:'Title'},{k:'url',label:'URL',ph:'https://…'},{k:'desc',label:'Description'}]
+  : [{k:'title',label:'Title'},{k:'body',label:'Body',type:'textarea'}].concat(key==='notes' ? [{k:'tags',label:'Tags (comma separated)',ph:'work, idea'}] : []);
+ openForm((item ? 'Edit ' : 'New ') + BRAIN_LABEL[key], fields, item || {}, vals => {
+  if (!vals.title) { toast('Give it a title', true); return false; }
+  if (isBm) {
+   if (!vals.url) { toast('Give it a URL', true); return false; }
+   if (!/^https?:\/\//i.test(vals.url)) vals.url = 'https://' + vals.url;
+  }
+  if (item) Object.assign(item, vals, {updated: Date.now()});
+  else (D().brain[key] || (D().brain[key] = [])).push(Object.assign({id: IVEDB.uid(), updated: Date.now()}, vals));
+  IVEDB.save(); render(); toast('Saved ✓');
+ },
+ item ? () => { if (confirm('Delete this '+BRAIN_LABEL[key].toLowerCase()+'?')) { D().brain[key] = (D().brain[key]||[]).filter(x => x.id !== item.id); IVEDB.save(); closeModal(); render(); toast('Deleted'); } } : null);
+}
 function catOf(app){ for (const c of Object.keys(CATS)) if ((D().apps[c]||[]).some(x => x.id === app.id)) return c; return 'personal'; }
 function favApps(){ const f = D().favorites; return allApps().filter(a => f.indexOf(a.url) >= 0); }
 function appCard(a, cat){
@@ -341,6 +464,27 @@ function tick(){
 document.getElementById('view').addEventListener('click', e => {
  const add = e.target.closest('[data-add]');
  if (add) return openEditor(add.dataset.add, null);
+ const addp = e.target.closest('[data-addproj]');
+ if (addp) return openProjectEditor(null);
+ const addb = e.target.closest('[data-addbrain]');
+ if (addb) return openBrainEditor(addb.dataset.addbrain, null);
+ const iact = e.target.closest('.icard [data-act]');
+ if (iact) {
+  const card = iact.closest('.icard'), kind = card.dataset.kind, id = card.dataset.id, act = iact.dataset.act;
+  if (kind === 'project') {
+   const p = D().projects.find(x => x.id === id); if (!p) return;
+   if (act === 'done') { p.status = 'done'; p.doneAt = Date.now(); p.progress = 100; p.updated = Date.now(); IVEDB.save(); render(); toast('Project completed ✓'); }
+   else if (act === 'reopen') { p.status = 'active'; p.doneAt = null; p.updated = Date.now(); IVEDB.save(); render(); toast('Reopened'); }
+   else if (act === 'edit') openProjectEditor(p);
+   else if (act === 'del') { if (confirm('Delete "'+p.title+'"?')) { D().projects = D().projects.filter(x => x.id !== id); IVEDB.save(); render(); toast('Deleted'); } }
+  } else {
+   const list = D().brain[kind] || [];
+   const item = list.find(x => x.id === id); if (!item) return;
+   if (act === 'edit') openBrainEditor(kind, item);
+   else if (act === 'del') { if (confirm('Delete "'+item.title+'"?')) { D().brain[kind] = list.filter(x => x.id !== id); IVEDB.save(); render(); toast('Deleted'); } }
+  }
+  return;
+ }
  const btn = e.target.closest('.abtn');
  if (btn) {
   const card = btn.closest('.acard');
@@ -369,7 +513,7 @@ document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal()
 document.getElementById('view').addEventListener('input', e => {
  if (e.target.id !== 'appsearch') return;
  const q = e.target.value.toLowerCase();
- document.querySelectorAll('#appgrid .acard').forEach(c => {
+ document.querySelectorAll('#appgrid .acard, #appgrid .icard').forEach(c => {
   const t = c.textContent.toLowerCase();
   c.style.display = t.indexOf(q) >= 0 ? '' : 'none';
  });

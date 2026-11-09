@@ -3,8 +3,8 @@ window.IVEHUB_CONFIG = {
   // login (change these before going public)
   creds: { user: 'jincai04', pass: 'Kin@g123' },
   // IVE Token API (the local backend that checks OpenClaw usage)
-  tokenApi: 'https://light-news-open.loca.lt',
-  tokenKey: '517149d360e391fe1e6f403c873f7e670849f38414f175bf',
+  tokenApi: 'https://monitoring.genset.com.my/zai-usage-api',
+  tokenKey: 'a2d186f57f1fc01ffcb0b4bc1e53d8e34c921cbeab3f7a44',
   apps: {
     mgm: [
       { icon: '📺', name: 'Office TV Dashboard', url: 'http://101.32.243.8:3050/', desc: 'Live ops floor view' },

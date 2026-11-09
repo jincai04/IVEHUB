@@ -3,7 +3,7 @@ window.IVEHUB_CONFIG = {
   // login (change these before going public)
   creds: { user: 'jincai04', pass: 'Kin@g123' },
   // IVE Token API (the local backend that checks OpenClaw usage)
-  tokenApi: 'http://127.0.0.1:3008',
+  tokenApi: 'https://light-news-open.loca.lt',
   tokenKey: '517149d360e391fe1e6f403c873f7e670849f38414f175bf',
   apps: {
     mgm: [

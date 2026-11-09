@@ -1,0 +1,155 @@
+<!doctype html><html><head><meta charset="utf-8"><title>IVEHUB</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<script src="config.js"></script>
+<style>
+ *{box-sizing:border-box}
+ body{font-family:'Segoe UI',system-ui,sans-serif;background:#070b14;color:#e8edf5;margin:0;min-height:100vh;overflow-x:hidden}
+ .bg{position:fixed;inset:0;z-index:0;overflow:hidden}
+ .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.35;animation:drift 22s ease-in-out infinite alternate}
+ .orb.a{width:520px;height:520px;background:#0ea5e9;top:-160px;left:-120px}
+ .orb.b{width:460px;height:460px;background:#6366f1;bottom:-140px;right:-100px;animation-delay:-7s}
+ .orb.c{width:340px;height:340px;background:#10b981;top:40%;left:55%;animation-delay:-14s;opacity:.22}
+ @keyframes drift{0%{transform:translate(0,0) scale(1)}50%{transform:translate(60px,40px) scale(1.12)}100%{transform:translate(-40px,70px) scale(.95)}}
+ .wrap{position:relative;z-index:1;max-width:1060px;margin:0 auto;padding:48px 24px 60px}
+ header{text-align:center;margin-bottom:36px;animation:fadeDown .8s ease both}
+ .logo{width:76px;height:76px;border-radius:20px;overflow:hidden;margin:0 auto 12px;border:2px solid rgba(125,211,252,.7);box-shadow:0 12px 36px rgba(14,165,233,.4)}
+ .logo img{width:100%;height:100%;object-fit:cover}
+ .brand{font-size:2.2rem;font-weight:800;letter-spacing:3px;background:linear-gradient(90deg,#7dd3fc,#a5b4fc,#6ee7b7,#7dd3fc);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shine 8s linear infinite}
+ @keyframes shine{to{background-position:300% 0}}
+ .tag{color:#8aa0b8;font-size:.85rem;letter-spacing:4px;text-transform:uppercase;margin-top:6px}
+ h2{font-size:.8rem;color:#7c96b4;margin:34px 0 16px;letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:12px;animation:fadeUp .8s ease both}
+ h2::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(125,211,252,.35),transparent)}
+ .glass{background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.09);border-radius:18px}
+ .usage{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
+ .card{padding:24px 26px;position:relative;overflow:hidden;animation:fadeUp .8s ease both}
+ .card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,transparent,var(--glow,#4ade80),transparent);opacity:.8}
+ .row{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:14px}
+ .label{font-weight:600;font-size:.98rem;color:#c7d4e4}
+ .pct{font-size:2.2rem;font-weight:800;font-variant-numeric:tabular-nums}
+ .pct.ok{color:#4ade80;text-shadow:0 0 18px rgba(74,222,128,.4)}
+ .pct.warn{color:#fbbf24;text-shadow:0 0 18px rgba(251,191,36,.4)}
+ .pct.danger{color:#f87171;text-shadow:0 0 18px rgba(248,113,113,.45)}
+ .bar{height:9px;background:rgba(255,255,255,.07);border-radius:99px;overflow:hidden}
+ .fill{height:100%;border-radius:99px;transition:width 1s cubic-bezier(.22,1,.36,1)}
+ .fill.ok{background:linear-gradient(90deg,#22c55e,#4ade80);box-shadow:0 0 14px rgba(74,222,128,.5)}
+ .fill.warn{background:linear-gradient(90deg,#f59e0b,#fbbf24);box-shadow:0 0 14px rgba(251,191,36,.5)}
+ .fill.danger{background:linear-gradient(90deg,#ef4444,#f87171);box-shadow:0 0 16px rgba(248,113,113,.6)}
+ .meta{color:#8aa0b8;font-size:.78rem;margin-top:12px}
+ .planchip{display:inline-block;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;padding:2px 12px;border-radius:99px;font-size:.7rem;margin-left:8px;vertical-align:middle;letter-spacing:1px}
+ .topbar{position:fixed;top:18px;right:22px;z-index:5;animation:fadeDown .8s ease both .8s}
+ .btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;padding:8px 16px;border-radius:12px;font-size:.75rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-block}
+ .btn:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#f87171}
+ .hubs{display:flex;justify-content:center;gap:70px;flex-wrap:wrap}
+ .hub-area{display:flex;flex-direction:column;align-items:center;animation:fadeUp .8s ease both}
+ .hub{position:relative;width:170px;height:170px;cursor:pointer;border:none;background:none;padding:0;transition:transform .3s cubic-bezier(.22,1,.36,1)}
+ .hub:hover{transform:scale(1.07)}
+ .hub-tile{position:absolute;width:104px;height:104px;border-radius:24px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.7rem;letter-spacing:1px;transition:all .35s cubic-bezier(.22,1,.36,1);backdrop-filter:blur(10px)}
+ .hub-tile.t1{left:0;top:14px;z-index:2;transform:rotate(-8deg)}
+ .hub-tile.t2{right:0;top:14px;z-index:2;transform:rotate(8deg)}
+ .hub-tile.front{left:50%;top:50%;z-index:3;transform:translate(-50%,-50%);width:118px;height:118px;border-radius:28px;font-size:2rem}
+ .hub.mgm .t1,.hub.mgm .t2{color:#7dd3fc;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(56,189,248,.55);box-shadow:0 10px 40px rgba(14,165,233,.28)}
+ .hub.mgm .front{background:linear-gradient(145deg,#0c4a6e,#0891b2);border:2px solid rgba(125,211,252,.8);box-shadow:0 14px 48px rgba(14,165,233,.45)}
+ .hub.lunar .t1,.hub.lunar .t2{color:#c4b5fd;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(167,139,250,.55);box-shadow:0 10px 40px rgba(139,92,246,.28)}
+ .hub.lunar .front{background:linear-gradient(145deg,#4c1d95,#7c3aed);border:2px solid rgba(196,181,253,.8);box-shadow:0 14px 48px rgba(139,92,246,.45)}
+ .hub.db .t1,.hub.db .t2{color:#6ee7b7;background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(255,255,255,.02));border:1.5px solid rgba(52,211,153,.55);box-shadow:0 10px 40px rgba(16,185,129,.28)}
+ .hub.db .front{background:linear-gradient(145deg,#064e3b,#059669);border:2px solid rgba(110,231,183,.8);box-shadow:0 14px 48px rgba(16,185,129,.45)}
+ .hub:hover .t1{transform:rotate(-16deg) translate(-14px,2px)}
+ .hub:hover .t2{transform:rotate(16deg) translate(14px,2px)}
+ .ring{position:absolute;inset:-16px;border-radius:50%;border:1px dashed rgba(56,189,248,.35);animation:spin 14s linear infinite}
+ @keyframes spin{to{transform:rotate(360deg)}}
+ .hub-label{margin-top:16px;color:#a8bdd2;font-weight:700;letter-spacing:3px;font-size:.95rem;text-transform:uppercase;text-align:center}
+ .hub-hint{color:#5b7189;font-size:.7rem;margin-top:4px}
+ .overlay{position:fixed;inset:0;z-index:10;background:rgba(4,8,18,.82);backdrop-filter:blur(20px);display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .35s}
+ .overlay.open{opacity:1;pointer-events:auto}
+ .panel{width:min(940px,92vw);max-height:86vh;overflow:auto;padding:30px;transform:translateY(26px) scale(.96);transition:transform .4s cubic-bezier(.22,1,.36,1)}
+ .overlay.open .panel{transform:none}
+ .panel-head{display:flex;align-items:center;gap:16px;margin-bottom:22px}
+ .panel-badge{width:52px;height:52px;border-radius:16px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:1.05rem;flex:none}
+ .panel-badge.mgm{color:#7dd3fc;background:linear-gradient(145deg,#0c4a6e,#0891b2);border:1.5px solid rgba(125,211,252,.7)}
+ .panel-badge.lunar{color:#ddd6fe;background:linear-gradient(145deg,#4c1d95,#7c3aed);border:1.5px solid rgba(196,181,253,.7)}
+ .panel-badge.db{color:#d1fae5;background:linear-gradient(145deg,#064e3b,#059669);border:1.5px solid rgba(110,231,183,.7)}
+ .panel-title{font-size:1.15rem;font-weight:750;letter-spacing:1px}
+ .panel-sub{color:#8aa0b8;font-size:.74rem;margin-top:3px}
+ .close{margin-left:auto;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;width:38px;height:38px;border-radius:12px;font-size:1rem;cursor:pointer}
+ .apps{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px}
+ .app{display:flex;align-items:center;gap:14px;padding:16px 18px;text-decoration:none;color:inherit;transition:transform .25s,border-color .25s,box-shadow .25s}
+ .app:hover{transform:translateY(-3px);border-color:rgba(125,211,252,.5);box-shadow:0 14px 34px rgba(2,8,23,.6)}
+ .ico{font-size:1.5rem;flex:none}
+ .txt{flex:1;min-width:0}
+ .nm{display:block;font-weight:650;font-size:.95rem;color:#eef4fb}
+ .desc{display:block;color:#8aa0b8;font-size:.75rem;margin-top:3px}
+ .arrow{color:#38bdf8;transform:translateX(-6px);opacity:0;transition:all .25s}
+ .app:hover .arrow{transform:none;opacity:1}
+ footer{text-align:center;color:#46586e;font-size:.7rem;margin-top:52px;letter-spacing:1px}
+ @keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+ @keyframes fadeDown{from{opacity:0;transform:translateY(-18px)}to{opacity:1;transform:none}}
+</style></head><body>
+<div class="bg"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
+<div class="topbar"><a class="btn" href="index.html" onclick="sessionStorage.removeItem('ivehub_auth')">LOCK ⬦</a></div>
+<div class="wrap">
+ <header>
+  <div class="logo"><img src="logo.png" alt="IVEHUB"></div>
+  <div class="brand">IVEHUB</div>
+  <div class="tag">Operations Control Portal</div>
+ </header>
+
+ <h2>⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span></h2>
+ <div class="usage" id="cards"><div class="glass card" style="color:#8aa0b8" id="usageLoading">loading…</div></div>
+
+ <h2>📁 Applications</h2>
+ <div class="hubs">
+  <div class="hub-area">
+   <button class="hub mgm" data-ov="ovMgm"><span class="ring"></span><span class="hub-tile t1"></span><span class="hub-tile t2"></span><span class="hub-tile front">MGM</span></button>
+   <div class="hub-label">MGM Apps</div><div class="hub-hint" id="cnt-mgm"></div>
+  </div>
+  <div class="hub-area">
+   <button class="hub lunar" data-ov="ovLunar"><span class="ring"></span><span class="hub-tile t1"></span><span class="hub-tile t2"></span><span class="hub-tile front">🌙</span></button>
+   <div class="hub-label">Lunar Apps</div><div class="hub-hint" id="cnt-lunar"></div>
+  </div>
+  <div class="hub-area">
+   <button class="hub db" data-ov="ovDb"><span class="ring"></span><span class="hub-tile t1"></span><span class="hub-tile t2"></span><span class="hub-tile front">🗄️</span></button>
+   <div class="hub-label">Databases</div><div class="hub-hint" id="cnt-db"></div>
+  </div>
+ </div>
+ <footer>IVEHUB · <span id="updated"></span></footer>
+</div>
+<div class="overlay" id="ovMgm"><div class="glass panel"><div class="panel-head"><div class="panel-badge mgm">MGM</div><div><div class="panel-title">MGM Applications</div><div class="panel-sub" id="sub-mgm"></div></div><button class="close" onclick="closeOv()">✕</button></div><div class="apps" id="apps-mgm"></div></div></div>
+<div class="overlay" id="ovLunar"><div class="glass panel"><div class="panel-head"><div class="panel-badge lunar">🌙</div><div><div class="panel-title">Lunar Applications</div><div class="panel-sub" id="sub-lunar"></div></div><button class="close" onclick="closeOv()">✕</button></div><div class="apps" id="apps-lunar"></div></div></div>
+<div class="overlay" id="ovDb"><div class="glass panel"><div class="panel-head"><div class="panel-badge db">🗄️</div><div><div class="panel-title">Databases</div><div class="panel-sub" id="sub-db"></div></div><button class="close" onclick="closeOv()">✕</button></div><div class="apps" id="apps-db"></div></div></div>
+<script>
+if (!sessionStorage.getItem('ivehub_auth')) location.href = 'index.html';
+const APPS = (window.IVEHUB_CONFIG && window.IVEHUB_CONFIG.apps) || {};
+const TOKEN_API = (window.IVEHUB_CONFIG && window.IVEHUB_CONFIG.tokenApi) || 'http://127.0.0.1:3008';
+const TOKEN_KEY = (window.IVEHUB_CONFIG && window.IVEHUB_CONFIG.tokenKey) || '';
+function card(apps, key){
+  const el = document.getElementById('apps-'+key);
+  el.innerHTML = apps.map(a => `<a class="app glass" href="${a.url}" target="_blank" rel="noopener"><span class="ico">${a.icon}</span><span class="txt"><span class="nm">${a.name}</span><span class="desc">${a.desc}</span></span><span class="arrow">→</span></a>`).join('');
+  document.getElementById('sub-'+key).textContent = apps.length + ' apps · click any to open';
+  document.getElementById('cnt-'+key).textContent = apps.length + ' inside';
+}
+card(APPS.mgm||[], 'mgm'); card(APPS.lunar||[], 'lunar'); card(APPS.db||[], 'db');
+document.querySelectorAll('.hub').forEach(h => h.addEventListener('click', () => document.getElementById(h.dataset.ov).classList.add('open')));
+function closeOv(){ document.querySelectorAll('.overlay').forEach(o => o.classList.remove('open')); }
+document.querySelectorAll('.overlay').forEach(o => o.addEventListener('click', e => { if (e.target === o) closeOv(); }));
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeOv(); });
+async function refresh(){
+  try {
+    const r = await fetch(TOKEN_API + '/api/usage', { headers: { 'x-api-key': TOKEN_KEY } });
+    const d = await r.json();
+    if (d.error) throw new Error(d.error);
+    document.getElementById('plan').textContent = (d.plan||'').toUpperCase();
+    const el = document.getElementById('cards'); el.innerHTML = '';
+    for (const w of d.windows || []) {
+      const p = w.percent, cls = p>=80?'danger':p>=50?'warn':'ok';
+      const glow = p>=80?'#f87171':p>=50?'#fbbf24':'#4ade80';
+      const label = w.type==='TOKENS_LIMIT' ? ('5-Hour Window ('+(w.hours||5)+'h)') : 'Monthly Quota';
+      const reset = w.resetMs ? new Date(w.resetMs).toLocaleString('en-MY',{weekday:'short',day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '?';
+      el.innerHTML += `<div class="glass card" style="--glow:${glow}"><div class="row"><span class="label">${label}</span><span class="pct ${cls}">${p}%</span></div><div class="bar"><div class="fill ${cls}" style="width:${p}%"></div></div><div class="meta">resets ${reset}</div></div>`;
+    }
+    document.getElementById('updated').textContent = 'usage synced ' + new Date().toLocaleTimeString('en-MY');
+  } catch(e) {
+    document.getElementById('usageLoading').innerHTML = '⚠ Token API unreachable (' + (TOKEN_API==='' ? 'not configured' : TOKEN_API) + ') — set it in config.js. ' + e.message;
+  }
+}
+refresh(); setInterval(refresh, 60000);
+</script></body></html>

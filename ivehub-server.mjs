@@ -227,9 +227,9 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
  /* MGM hub folder */
  .hubs{display:flex;justify-content:center;gap:70px;flex-wrap:wrap}
  .lunar-tile{color:#c4b5fd;border-color:rgba(167,139,250,.55);box-shadow:0 10px 40px rgba(139,92,246,.28), inset 0 0 26px rgba(167,139,250,.12)}
- .hub.lunar .front{background:linear-gradient(145deg,#4c1d95,#7c3aed);border-color:rgba(196,181,253,.8);box-shadow:0 14px 48px rgba(139,92,246,.45), inset 0 0 30px rgba(196,181,253,.25)}
+ .hub.lunar .front{background:linear-gradient(145deg,#4c1d95,#7c3aed);border-color:rgba(196,181,253,.8);box-shadow:0 14px 48px rgba(139,92,246,.45), inset 0 0 30px rgba(196,181,253,.25);font-size:1.4rem}
  .lunar-ring{border-color:rgba(167,139,250,.35)!important}
- .lunar-badge{background:linear-gradient(145deg,#4c1d95,#7c3aed);border-color:rgba(196,181,253,.7);color:#ddd6fe;box-shadow:0 8px 26px rgba(139,92,246,.4)}
+ .lunar-badge{background:linear-gradient(145deg,#4c1d95,#7c3aed);border-color:rgba(196,181,253,.7);color:#ddd6fe;box-shadow:0 8px 26px rgba(139,92,246,.4);font-size:.75rem}
  .db-tile{color:#6ee7b7;border-color:rgba(52,211,153,.55);box-shadow:0 10px 40px rgba(16,185,129,.28), inset 0 0 26px rgba(52,211,153,.12)}
  .hub.db .front{background:linear-gradient(145deg,#064e3b,#059669);border-color:rgba(110,231,183,.8);box-shadow:0 14px 48px rgba(16,185,129,.45), inset 0 0 30px rgba(110,231,183,.25)}
  .db-ring{border-color:rgba(52,211,153,.35)!important}
@@ -325,7 +325,7 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
     <span class="ring lunar-ring"></span>
     <span class="hub-tile lunar-tile t1"></span>
     <span class="hub-tile lunar-tile t2"></span>
-    <span class="hub-tile lunar-tile front">ðŸŒ™</span>
+    <span class="hub-tile lunar-tile front">LUNAR</span>
    </button>
    <div class="hub-label">Lunar Apps</div>
    <div class="hub-hint">3 applications inside</div>
@@ -374,7 +374,7 @@ ${appCards}
 <div class="overlay" id="ovLunar">
  <div class="glass panel">
   <div class="panel-head">
-   <div class="panel-mgm lunar-badge">ðŸŒ™</div>
+   <div class="panel-mgm lunar-badge">LUNAR</div>
    <div>
     <div class="panel-title">Lunar Applications</div>
     <div class="panel-sub">3 apps Â· click any to open in a new window</div>

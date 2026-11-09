@@ -87,6 +87,22 @@ const dbCards = DB_APPS.map(([name, url, icon, desc]) =>
    </a>`
 ).join('\n');
 
+const MODU_APPS = [
+  ['gmpmobile app', 'https://gmpmobile.netlify.app/', '\u{1F4F1}', 'GMP mobile app'],
+  ['tbsn app', 'https://tbsn.netlify.app/', '\u{1F310}', 'TBSN app'],
+  ['women app', 'https://womenempowermentapp.netlify.app/', '\u{1F338}', 'Women empowerment app'],
+  ['sanyog dashboard', 'https://adminhrdashboard.netlify.app/', '\u{1F4CA}', 'Sanyog HR dashboard'],
+  // add more MODU apps here: ['Name', 'https://url', 'icon', 'Description'],
+];
+
+const moduCards = MODU_APPS.map(([name, url, icon, desc]) =>
+  `<a class="app" href="${url}" target="_blank" rel="noopener">
+     <span class="ico">${icon}</span>
+     <span class="txt"><span class="nm">${name}</span><span class="desc">${desc}</span><span class="url">${url.replace(/^https?:\/\//, '').replace(/\/$/, '')}</span></span>
+     <span class="arrow">&#8594;</span>
+   </a>`
+).join('\n');
+
 const LOGIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHUB Â· Sign in</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
@@ -218,6 +234,10 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
  .hub.db .front{background:linear-gradient(145deg,#064e3b,#059669);border-color:rgba(110,231,183,.8);box-shadow:0 14px 48px rgba(16,185,129,.45), inset 0 0 30px rgba(110,231,183,.25)}
  .db-ring{border-color:rgba(52,211,153,.35)!important}
  .db-badge{background:linear-gradient(145deg,#064e3b,#059669);border-color:rgba(110,231,183,.7);color:#d1fae5;box-shadow:0 8px 26px rgba(16,185,129,.4)}
+ .modu-tile{color:#fcd34d;border-color:rgba(251,191,36,.55);box-shadow:0 10px 40px rgba(245,158,11,.28), inset 0 0 26px rgba(251,191,36,.12)}
+ .hub.modu .front{background:linear-gradient(145deg,#7c2d12,#ea580c);border-color:rgba(252,211,77,.8);box-shadow:0 14px 48px rgba(245,158,11,.45), inset 0 0 30px rgba(252,211,77,.25);font-size:1.7rem}
+ .modu-ring{border-color:rgba(251,191,36,.35)!important}
+ .modu-badge{background:linear-gradient(145deg,#7c2d12,#ea580c);border-color:rgba(252,211,77,.7);color:#fde68a;box-shadow:0 8px 26px rgba(245,158,11,.4);font-size:.9rem}
  .hub-area{display:flex;flex-direction:column;align-items:center;animation:fadeUp .8s ease both}
  .hub{position:relative;width:190px;height:190px;cursor:pointer;border:none;background:none;padding:0;transition:transform .3s cubic-bezier(.22,1,.36,1)}
  .hub:hover{transform:scale(1.07)}
@@ -320,6 +340,16 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
    <div class="hub-label">Databases</div>
    <div class="hub-hint">5 data sources inside</div>
   </div>
+  <div class="hub-area">
+   <button class="hub modu" id="hubModu" title="Open MODU apps">
+    <span class="ring modu-ring"></span>
+    <span class="hub-tile modu-tile t1"></span>
+    <span class="hub-tile modu-tile t2"></span>
+    <span class="hub-tile modu-tile front">MODU</span>
+   </button>
+   <div class="hub-label">MODU Apps</div>
+   <div class="hub-hint">4 applications inside</div>
+  </div>
  </div>
 
  <footer>IVEHUB Â· PORTAL v2 Â· <span id="updated"></span></footer>
@@ -373,6 +403,22 @@ ${dbCards}
  </div>
 </div>
 
+<div class="overlay" id="ovModu">
+ <div class="glass panel">
+  <div class="panel-head">
+   <div class="panel-mgm modu-badge">MODU</div>
+   <div>
+    <div class="panel-title">MODU Applications</div>
+    <div class="panel-sub">${MODU_APPS.length} apps &#183; click any to open in a new window</div>
+   </div>
+   <button class="close" id="closeBtnModu" title="Close">&#10005;</button>
+  </div>
+  <div class="apps">
+${moduCards}
+  </div>
+ </div>
+</div>
+
 <script>
 // welcome splash after fresh login
 if (new URLSearchParams(location.search).get('w') === '1') {
@@ -393,7 +439,11 @@ const ovD = document.getElementById('ovDb');
 document.getElementById('hubDb').addEventListener('click', ()=> ovD.classList.add('open'));
 document.getElementById('closeBtnDb').addEventListener('click', ()=> ovD.classList.remove('open'));
 ovD.addEventListener('click', e=>{ if(e.target===ovD) ovD.classList.remove('open'); });
-document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ ov.classList.remove('open'); ovL.classList.remove('open'); ovD.classList.remove('open'); } });
+const ovM = document.getElementById('ovModu');
+document.getElementById('hubModu').addEventListener('click', ()=> ovM.classList.add('open'));
+document.getElementById('closeBtnModu').addEventListener('click', ()=> ovM.classList.remove('open'));
+ovM.addEventListener('click', e=>{ if(e.target===ovM) ovM.classList.remove('open'); });
+document.addEventListener('keydown', e=>{ if(e.key==='Escape'){ ov.classList.remove('open'); ovL.classList.remove('open'); ovD.classList.remove('open'); ovM.classList.remove('open'); } });
 document.querySelectorAll('.app').forEach(a=>{
  a.addEventListener('mousemove',e=>{
   const r=a.getBoundingClientRect();

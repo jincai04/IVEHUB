@@ -27,6 +27,13 @@ window.IVEHUB_CONFIG = {
       { icon: '📮', name: 'WA & Email Database', url: 'https://docs.google.com/spreadsheets/d/161JDSHbUCmtv8c1MB9WY0pOVfXD9_9vawkqnl5IBido/edit?pli=1&gid=214944863#gid=214944863', desc: 'WhatsApp & email contacts' },
       { icon: '🗄️', name: 'NocoDB MGM', url: 'https://mgmgenerator.com/nocodb/dashboard/#/default/pu7hatrkbloa642/m88mc46pwzmq5o5/vwdgiudw8hsvf6c3/genset-service-tracking', desc: 'Genset service tracking' },
       { icon: '🔗', name: 'OLD genset api', url: 'https://gensetapi.genset.com.my/api/genset-list', desc: 'Legacy genset feed' }
+    ],
+    modu: [
+      { icon: '📱', name: 'gmpmobile app', url: 'https://gmpmobile.netlify.app/', desc: 'GMP mobile app' },
+      { icon: '🌐', name: 'tbsn app', url: 'https://tbsn.netlify.app/', desc: 'TBSN app' },
+      { icon: '🌸', name: 'women app', url: 'https://womenempowermentapp.netlify.app/', desc: 'Women empowerment app' },
+      { icon: '📊', name: 'sanyog dashboard', url: 'https://adminhrdashboard.netlify.app/', desc: 'Sanyog HR dashboard' }
+      // add more MODU apps here, e.g. { icon: '🧩', name: 'My Module', url: 'https://...', desc: 'What it does' }
     ]
   }
 };

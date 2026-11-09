@@ -7,7 +7,7 @@ window.IVEHUB_CONFIG = {
   tokenKey: 'a2d186f57f1fc01ffcb0b4bc1e53d8e34c921cbeab3f7a44',
   // Google Drive sync (optional until set — see README for setup steps)
   google: {
-    clientId: '' // OAuth Client ID (Web application) from Google Cloud Console
+    clientId: '254584038567-73jmgttre30emq6l83lpgttvsu7s8aat.apps.googleusercontent.com'
   },
   apps: {
     mgm: [

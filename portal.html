@@ -4,6 +4,7 @@
 <script src="gdrive.js"></script>
 <style>
  *{box-sizing:border-box}
+ :root{--acc:#38bdf8;--accbg:rgba(56,189,248,.12);--accbrd:rgba(56,189,248,.4)}
  body{font-family:'Segoe UI',system-ui,sans-serif;background:#070b14;color:#e8edf5;margin:0;min-height:100vh}
  .bg{position:fixed;inset:0;z-index:0;overflow:hidden;pointer-events:none}
  .orb{position:absolute;border-radius:50%;filter:blur(90px);opacity:.3;animation:drift 22s ease-in-out infinite alternate}
@@ -25,7 +26,7 @@
  .navsec>a{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:10px;color:#c7d4e4;font-weight:700;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none}
  .navsub a{display:flex;align-items:center;gap:8px;padding:6px 10px 6px 26px;margin:1px 0;border-radius:9px;color:#8aa0b8;font-size:.8rem;text-decoration:none;transition:all .2s;border-left:2px solid transparent}
  .navsub a:hover{color:#c7d4e4;background:rgba(255,255,255,.04)}
- .navsub a.active{color:#7dd3fc;background:rgba(56,189,248,.1);border-left-color:#38bdf8}
+ .navsub a.active{color:var(--acc);background:var(--accbg);border-left-color:var(--acc)}
  .sidefoot{padding:14px;border-top:1px solid rgba(255,255,255,.08)}
  .drivebtn{width:100%;display:flex;align-items:center;gap:8px;justify-content:center;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#c7d4e4;padding:9px 10px;border-radius:11px;font-size:.72rem;letter-spacing:.5px;cursor:pointer;transition:all .25s}
  .drivebtn:hover{border-color:rgba(125,211,252,.4);color:#7dd3fc}
@@ -45,9 +46,9 @@
  .ph .sub{color:#8aa0b8;font-size:.8rem;margin-top:4px}
  .tools{display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
  .search{flex:1;min-width:180px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.12);color:#e8edf5;padding:9px 14px;border-radius:12px;font-size:.85rem;outline:none;font-family:inherit}
- .search:focus{border-color:rgba(125,211,252,.5)}
- .addbtn{background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.4);color:#7dd3fc;padding:9px 16px;border-radius:12px;font-size:.78rem;letter-spacing:1px;cursor:pointer;transition:all .25s}
- .addbtn:hover{background:rgba(56,189,248,.25)}
+ .search:focus{border-color:var(--accbrd)}
+ .addbtn{background:var(--accbg);border:1px solid var(--accbrd);color:var(--acc);padding:9px 16px;border-radius:12px;font-size:.78rem;letter-spacing:1px;cursor:pointer;transition:all .25s;display:inline-block}
+ .addbtn:hover{filter:brightness(1.5)}
  /* ---------- cards / grids ---------- */
  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:13px}
  .acard{display:flex;align-items:center;gap:12px;padding:15px 16px;transition:transform .25s,border-color .25s;animation:fadeUp .5s ease both}
@@ -78,7 +79,21 @@
  .hrow .when{color:#5b7189;font-size:.7rem;flex:none;width:72px}
  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
  .stat{padding:16px 22px;text-align:center;flex:1;min-width:120px}
- .stat .n{font-size:1.7rem;font-weight:800;color:#7dd3fc}
+ .stat .n{font-size:1.7rem;font-weight:800;color:var(--acc)}
+ .swflex{display:flex;gap:14px;flex-wrap:wrap}
+ .sw{width:42px;height:42px;border-radius:13px;border:2px solid rgba(255,255,255,.15);cursor:pointer;color:#070b14;font-size:1.05rem;font-weight:800;transition:transform .2s,box-shadow .2s}
+ .sw:hover{transform:scale(1.12)}
+ .sw.on{border-color:#fff;box-shadow:0 0 16px rgba(255,255,255,.3)}
+ .tgl{width:48px;height:26px;border-radius:99px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);cursor:pointer;position:relative;transition:all .25s;flex:none;padding:0}
+ .tgl span{position:absolute;top:2px;left:3px;width:19px;height:19px;border-radius:50%;background:#8aa0b8;transition:all .25s}
+ .tgl.on{background:var(--accbg);border-color:var(--accbrd)}
+ .tgl.on span{left:23px;background:var(--acc)}
+ .field input[type=date]{color-scheme:dark}
+ body.compact .main{padding:16px 18px 40px}
+ body.compact .ph h1{font-size:1.15rem}
+ body.compact .acard,body.compact .icard{padding:10px 12px}
+ body.compact .grid{gap:9px}
+ body.compact .icard-meta{margin-top:5px}
  .stat .l{color:#8aa0b8;font-size:.66rem;letter-spacing:1px;margin-top:4px}
  /* ---------- usage ---------- */
  .usage{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}
@@ -122,8 +137,8 @@
  .field input:focus,.field select:focus,.field textarea:focus{border-color:rgba(125,211,252,.5)}
  .macts{display:flex;gap:10px;margin-top:20px}
  .mbtn{flex:1;padding:11px;border-radius:12px;font-size:.82rem;letter-spacing:1px;cursor:pointer;border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.05);color:#c7d4e4;transition:all .25s}
- .mbtn.primary{background:rgba(56,189,248,.16);border-color:rgba(56,189,248,.45);color:#7dd3fc}
- .mbtn.primary:hover{background:rgba(56,189,248,.28)}
+ .mbtn.primary{background:var(--accbg);border-color:var(--accbrd);color:var(--acc)}
+ .mbtn.primary:hover{filter:brightness(1.4)}
  .mbtn.danger{border-color:rgba(248,113,113,.35);color:#f87171}
  .toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(80px);z-index:50;background:rgba(10,16,30,.95);border:1px solid rgba(125,211,252,.35);color:#c7d4e4;padding:12px 22px;border-radius:14px;font-size:.82rem;box-shadow:0 18px 50px rgba(2,8,23,.7);transition:transform .4s cubic-bezier(.22,1,.36,1);max-width:88vw}
  .toast.show{transform:translateX(-50%) translateY(0)}
@@ -166,9 +181,9 @@ const NAV = [
  {id:'apps', icon:'📁', label:'Applications', subs:[['business','Business Apps'],['databases','Databases'],['personal','Personal Apps'],['development','Development Apps'],['favorites','Favorites']]},
  {id:'projects', icon:'🚀', label:'Projects', subs:[['active','Active Projects'],['completed','Completed Projects'],['history','Project History']]},
  {id:'brain', icon:'🧠', label:'My Brain', subs:[['notes','Notes'],['ideas','Ideas'],['knowledge','Knowledge'],['bookmarks','Bookmarks']]},
- {id:'tech', icon:'🖥️', label:'My Tech', subs:[['servers','Servers'],['domains','Domains'],['devices','Devices'],['tools','Tools']], phase:3},
- {id:'life', icon:'🌱', label:'My Life', subs:[['goals','Goals'],['timeline','Timeline'],['records','Personal Records']], phase:3},
- {id:'settings', icon:'⚙️', label:'Settings', subs:[['appearance','Appearance'],['dashboard','Dashboard Customization'],['appmgmt','App Management']], phase:3}
+ {id:'tech', icon:'🖥️', label:'My Tech', subs:[['servers','Servers'],['domains','Domains'],['devices','Devices'],['tools','Tools']]},
+ {id:'life', icon:'🌱', label:'My Life', subs:[['goals','Goals'],['timeline','Timeline'],['records','Personal Records']]},
+ {id:'settings', icon:'⚙️', label:'Settings', subs:[['appearance','Appearance'],['dashboard','Dashboard Customization'],['appmgmt','App Management'],['backup','Backup & Sync']]}
 ];
 const CATS = { business:'Business Apps', databases:'Databases', personal:'Personal Apps', development:'Development Apps' };
 
@@ -201,6 +216,7 @@ function saveH(h){ try { localStorage.setItem(HKEY, JSON.stringify(h)); } catch(
 function ago(ts){ const s=(Date.now()-ts)/1000; if(s<60) return 'just now'; if(s<3600) return Math.floor(s/60)+'m ago'; if(s<86400) return Math.floor(s/3600)+'h ago'; return Math.floor(s/86400)+'d ago'; }
 document.addEventListener('click', e => {
  const a = e.target.closest ? e.target.closest('a.applink') : null; if (!a) return;
+ if (!a.getAttribute('href')) return;
  const card = a.closest('.acard');
  const h = loadH().filter(x => x.url !== a.href);
  h.unshift({ name: a.querySelector('.nm').textContent, icon: a.querySelector('.ico').textContent, url: a.href, ts: Date.now() });
@@ -235,14 +251,16 @@ async function loadUsage(){
 /* ---------------- views ---------------- */
 const VIEWS = {
  'home/dashboard'(){
+  const sd = ((D().settings||{}).dash)||{};
+  const showU = sd.usage !== false, showF = sd.favs !== false, showR = sd.recent !== false;
   const favs = favApps().slice(0,6), rec = loadH().slice(0,4);
   const hr = new Date().getHours();
   const greet = hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
   return `<div class="ph"><h1>My Dashboard</h1><div class="sub">${greet}, Boss — ${new Date().toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div>
-  <div class="h2">⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span></div>
-  <div class="usage" id="usagecards"><div class="glass card" style="color:#8aa0b8">loading…</div></div>
-  ${favs.length?`<div class="h2">⭐ Quick Access</div><div class="hflex">${favs.map(a=>chipHtml({icon:a.icon,name:a.name,url:a.url,ts:Date.now()})).join('').replaceAll("just now",'favorite')}</div>`:''}
-  ${rec.length?`<div class="h2">🕘 Recently Opened</div><div class="hflex">${rec.map(chipHtml).join('')}</div>`:''}`;
+  ${showU?`<div class="h2">⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span></div>
+  <div class="usage" id="usagecards"><div class="glass card" style="color:#8aa0b8">loading…</div></div>`:''}
+  ${showF&&favs.length?`<div class="h2">⭐ Quick Access</div><div class="hflex">${favs.map(a=>chipHtml({icon:a.icon,name:a.name,url:a.url,ts:Date.now()})).join('').replaceAll("just now",'favorite')}</div>`:''}
+  ${showR&&rec.length?`<div class="h2">🕘 Recently Opened</div><div class="hflex">${rec.map(chipHtml).join('')}</div>`:''}`;
  },
  'home/quick'(){
   const favs = favApps();
@@ -255,13 +273,14 @@ const VIEWS = {
   <div style="margin-top:18px"><button class="btn" id="clearh">CLEAR HISTORY</button></div>`;
  },
  'home/today'(){
+  const tl = (D().life.timeline||[]).filter(t => t.date === todayStr());
   return `<div class="ph"><h1>Today</h1><div class="sub">The big picture for today</div></div>
   <div class="glass card" style="padding:40px;text-align:center">
    <div class="clock" id="clock">--:--:--</div>
    <div class="greet" id="dateline"></div>
   </div>
-  <div class="h2">📅 Timeline</div>
-  <div class="placeholder glass" style="padding:30px">Timeline entries for today will appear here once My Life → Timeline lands (Phase 3).</div>`;
+  <div class="h2">📅 Today's Timeline</div>
+  ${tl.length ? `<div class="grid">${tl.map(tlCard).join('')}</div>` : '<div class="empty" style="margin-top:4px">Nothing on today\'s timeline — add entries in My Life → Timeline.</div>'}`;
  },
  'projects/active'(){
   const list = D().projects.filter(p => p.status !== 'done').sort((a,b) => (b.updated||0)-(a.updated||0));
@@ -285,6 +304,70 @@ const VIEWS = {
  'brain/ideas': brainView('ideas','Ideas'),
  'brain/knowledge': brainView('knowledge','Knowledge'),
  'brain/bookmarks': brainView('bookmarks','Bookmarks'),
+ 'tech/servers'(){ return techView('servers')(); },
+ 'tech/domains'(){ return techView('domains')(); },
+ 'tech/devices'(){ return techView('devices')(); },
+ 'tech/tools'(){ return techView('tools')(); },
+ 'life/goals'(){
+  const list = [].concat(D().life.goals).sort((a,b) => (a.done?1:0)-(b.done?1:0) || (b.progress||0)-(a.progress||0));
+  return `<div class="ph"><h1>Goals</h1><div class="sub">${list.filter(g=>!g.done).length} in pursuit · ${list.filter(g=>g.done).length} achieved</div></div>
+  <div class="tools"><button class="addbtn" data-addlife="goals">＋ NEW GOAL</button></div>
+  <div class="grid">${list.map(goalCard).join('') || '<div class="empty" style="grid-column:1/-1">No goals yet — dream big, start small.</div>'}</div>`;
+ },
+ 'life/timeline'(){
+  const list = [].concat(D().life.timeline).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+  return `<div class="ph"><h1>Timeline</h1><div class="sub">${list.length} entr${list.length===1?'y':'ies'} · today's items also show on Home → Today</div></div>
+  <div class="tools"><button class="addbtn" data-addlife="timeline">＋ ADD ENTRY</button></div>
+  <div class="grid">${list.map(tlCard).join('') || '<div class="empty" style="grid-column:1/-1">Your story starts here — add the first entry.</div>'}</div>`;
+ },
+ 'life/records'(){
+  const list = [].concat(D().life.records).sort((a,b) => (b.updated||0)-(a.updated||0));
+  return `<div class="ph"><h1>Personal Records</h1><div class="sub">${list.length} record${list.length===1?'':'s'}</div></div>
+  <div class="tools"><input class="search" id="appsearch" placeholder="Search records…"><button class="addbtn" data-addlife="records">＋ ADD RECORD</button></div>
+  <div class="grid" id="appgrid">${list.map(r => noteCard(Object.assign({}, r, {body:r.body}), 'records')).join('') || '<div class="empty" style="grid-column:1/-1">Nothing recorded yet.</div>'}</div>`;
+ },
+ 'settings/appearance'(){
+  const s = D().settings || {};
+  return `<div class="ph"><h1>Appearance</h1><div class="sub">Make IVEHUB yours</div></div>
+  <div class="glass card" style="padding:22px 24px">
+   <div class="label" style="margin-bottom:14px">Accent color</div>
+   <div class="swflex">${Object.entries(ACCENTS).map(([k,a]) => `<button class="sw${s.accent===k?' on':''}" data-accent="${k}" title="${k}" style="background:${a.hex}">${s.accent===k?'✓':''}</button>`).join('')}</div>
+  </div>
+  <div class="glass card" style="padding:20px 24px;margin-top:14px;display:flex;align-items:center;gap:14px">
+   <div style="flex:1"><div class="label">Compact mode</div><div class="icard-meta">Tighter spacing, smaller cards</div></div>
+   <button class="tgl${s.compact?' on':''}" data-compact="1" title="Toggle compact mode"><span></span></button>
+  </div>`;
+ },
+ 'settings/dashboard'(){
+  const d = ((D().settings || {}).dash) || {};
+  const rows = [['usage','⚡ OpenClaw Token Usage','Live token usage cards on My Dashboard'],['favs','⭐ Quick Access row','Your starred apps, shown as a shortcut row'],['recent','🕘 Recently Opened row','The latest apps opened on this device']];
+  return `<div class="ph"><h1>Dashboard Customization</h1><div class="sub">Choose what appears on My Dashboard</div></div>
+  ${rows.map(([k,t,sub]) => `<div class="glass card" style="padding:18px 24px;margin-bottom:12px;display:flex;align-items:center;gap:14px">
+   <div style="flex:1"><div class="label">${t}</div><div class="icart-meta icard-meta">${sub}</div></div>
+   <button class="tgl${d[k]!==false?' on':''}" data-dash="${k}"><span></span></button></div>`).join('')}`;
+ },
+ 'settings/appmgmt'(){
+  return `<div class="ph"><h1>App Management</h1><div class="sub">${allApps().length} apps across all categories</div></div>` +
+   Object.entries(CATS).map(([cid, cl]) => `<div class="h2">${cl} <span class="icard-meta" style="letter-spacing:0">(${(D().apps[cid]||[]).length})</span></div>
+   <div class="tools"><button class="addbtn" data-add="${cid}">＋ ADD TO ${cl.toUpperCase()}</button></div>
+   <div class="grid" style="margin-bottom:14px">${(D().apps[cid]||[]).map(a => appCard(a, cid)).join('') || '<div class="empty" style="grid-column:1/-1">Empty</div>'}</div>`).join('');
+ },
+ 'settings/backup'(){
+  const st = IVEDB.status();
+  return `<div class="ph"><h1>Backup & Sync</h1><div class="sub">Your data, your control</div></div>
+  <div class="glass card" style="padding:22px 24px">
+   <div class="label">Google Drive</div>
+   <div class="icard-meta" style="margin:6px 0 0">${st.connected ? '✓ Connected — data syncs automatically · last sync ' + (st.lastSync ? new Date(st.lastSync).toLocaleString('en-MY') : '…') : 'Not connected — data lives only in this browser\'s storage. Tap ☁ Connect Drive in the sidebar to sync across devices.'}</div>
+  </div>
+  <div class="glass card" style="padding:22px 24px;margin-top:14px">
+   <div class="label">Backup file</div>
+   <div class="icard-meta" style="margin:6px 0 14px">Download everything as a JSON file, or restore from a previous backup. Restoring replaces all current data.</div>
+   <div style="display:flex;gap:10px;flex-wrap:wrap">
+    <button class="addbtn" data-export="1">⬇ EXPORT JSON</button>
+    <label class="addbtn" style="cursor:pointer">⬆ IMPORT JSON<input type="file" id="impfile" accept=".json,application/json" style="display:none"></label>
+   </div>
+  </div>`;
+ },
  'apps/favorites'(){
   const favs = favApps();
   return `<div class="ph"><h1>Favorites</h1><div class="sub">Starred apps from every category</div></div>
@@ -301,6 +384,110 @@ for (const [cid, clabel] of Object.entries(CATS)) {
 }
 function allApps(){ const out=[]; for (const c of Object.keys(CATS)) for (const a of D().apps[c]||[]) out.push(a); return out; }
 function fmtDate(ts){ return ts ? new Date(ts).toLocaleDateString('en-MY',{day:'numeric',month:'short'}) : '?'; }
+function todayStr(){ const n = new Date(); return n.getFullYear() + '-' + String(n.getMonth()+1).padStart(2,'0') + '-' + String(n.getDate()).padStart(2,'0'); }
+
+/* ---------------- appearance ---------------- */
+const ACCENTS = {
+ blue:  { hex:'#38bdf8', bg:'rgba(56,189,248,.12)',  brd:'rgba(56,189,248,.4)' },
+ purple:{ hex:'#a78bfa', bg:'rgba(167,139,250,.12)', brd:'rgba(167,139,250,.4)' },
+ green: { hex:'#34d399', bg:'rgba(52,211,153,.12)',  brd:'rgba(52,211,153,.4)' },
+ amber: { hex:'#fbbf24', bg:'rgba(251,191,36,.12)',  brd:'rgba(251,191,36,.4)' },
+ pink:  { hex:'#f472b6', bg:'rgba(244,114,182,.12)', brd:'rgba(244,114,182,.4)' }
+};
+function applySettings(){
+ const s = D().settings || {};
+ const a = ACCENTS[s.accent] || ACCENTS.blue;
+ const r = document.documentElement.style;
+ r.setProperty('--acc', a.hex); r.setProperty('--accbg', a.bg); r.setProperty('--accbrd', a.brd);
+ document.body.classList.toggle('compact', !!s.compact);
+}
+
+/* ---------------- my tech ---------------- */
+const TECH = {
+ servers: ['Server', 'IP address', '🖥️', 'web-server-01', '101.32.243.8'],
+ domains: ['Domain', 'Expires / registrar', '🌐', 'example.com.my', '2027-01, Cloudflare'],
+ devices: ['Device', 'Spec / type', '💻', 'MacBook Pro M3', 'laptop · work'],
+ tools:   ['Tool', 'Category', '🧰', 'VS Code', 'editor']
+};
+function techView(key){
+ const t = TECH[key];
+ return () => {
+  const list = [].concat(D().tech[key]||[]).sort((a,b) => (a.name||'').localeCompare(b.name||''));
+  return `<div class="ph"><h1>${key[0].toUpperCase()+key.slice(1)}</h1><div class="sub">${list.length} item${list.length===1?'':'s'}</div></div>
+  <div class="tools"><input class="search" id="appsearch" placeholder="Search ${key}…"><button class="addbtn" data-addtech="${key}">＋ ADD ${key.toUpperCase().slice(0,-1)}</button></div>
+  <div class="grid" id="appgrid">${list.map(x => techCard(x, key)).join('') || `<div class="empty" style="grid-column:1/-1">Nothing here yet — click ＋ ADD.</div>`}</div>`;
+ };
+}
+function techCard(x, key){
+ const t = TECH[key];
+ const inner = `<span class="ico">${t[2]}</span><span class="txt"><span class="nm">${esc(x.name)}</span><span class="desc">${esc([x.sub, x.notes].filter(Boolean).join(' · '))}</span></span>`;
+ return `<div class="glass icard acard" data-kind="${key}" data-id="${esc(x.id)}">
+  ${x.url ? `<a class="applink" href="${esc(x.url)}" target="_blank" rel="noopener">${inner}</a>` : `<span class="applink">${inner}</span>`}
+  <div class="acts"><button class="abtn" data-act="edit" title="Edit">✎</button><button class="abtn del" data-act="del" title="Delete">🗑</button></div></div>`;
+}
+function openTechEditor(key, item){
+ const t = TECH[key];
+ openForm((item ? 'Edit ' : 'New ') + t[0],
+  [{k:'name',label:t[0]+' name',ph:t[3]},{k:'sub',label:t[1],ph:t[4]},{k:'url',label:'URL (optional)',ph:'https://…'},{k:'notes',label:'Notes',type:'textarea'}],
+  item || {},
+  vals => {
+   if (!vals.name) { toast('Give it a name', true); return false; }
+   if (vals.url && !/^https?:\/\//i.test(vals.url)) vals.url = 'https://' + vals.url;
+   if (item) Object.assign(item, vals, {updated: Date.now()});
+   else (D().tech[key] || (D().tech[key] = [])).push(Object.assign({id: IVEDB.uid(), updated: Date.now()}, vals));
+   IVEDB.save(); render(); toast('Saved ✓');
+  },
+  item ? () => { if (confirm('Delete this ' + t[0].toLowerCase() + '?')) { D().tech[key] = (D().tech[key]||[]).filter(x => x.id !== item.id); IVEDB.save(); closeModal(); render(); toast('Deleted'); } } : null);
+}
+
+/* ---------------- my life ---------------- */
+function goalCard(g){
+ return `<div class="glass icard" data-kind="goals" data-id="${esc(g.id)}">
+  <div class="icard-head"><span class="nm" style="cursor:pointer" data-act="edit">${esc(g.title)}</span>${g.done ? '<span class="stchip done">ACHIEVED</span>' : ''}</div>
+  ${g.target ? `<div class="icard-meta" style="margin-top:5px">🎯 ${esc(g.target)}</div>` : ''}
+  <div class="bar" style="margin-top:10px"><div class="fill ok" style="width:${g.done?100:(g.progress||0)}%"></div></div>
+  <div class="icard-meta">${g.done ? 'achieved ' + fmtDate(g.doneAt||g.updated) : (g.progress||0) + '% there'}</div>
+  <div class="acts2">
+   ${g.done ? '<button class="abtn" data-act="undone">↩ undo</button>' : '<button class="abtn" data-act="done">✓ achieved</button>'}
+   <span style="flex:1"></span>
+   <button class="abtn" data-act="edit" title="Edit">✎</button>
+   <button class="abtn del" data-act="del" title="Delete">🗑</button>
+  </div></div>`;
+}
+function tlCard(t){
+ return `<div class="glass icard" data-kind="timeline" data-id="${esc(t.id)}">
+  <div class="icard-head"><span class="nm" style="cursor:pointer" data-act="edit">${esc(t.title)}</span><span style="color:var(--acc);font-size:.72rem;flex:none">${esc(t.date||'')}</span></div>
+  ${t.desc ? `<div class="bodyprev">${esc(t.desc)}</div>` : ''}
+  <div class="acts2"><button class="abtn" data-act="edit" title="Edit">✎</button><button class="abtn del" data-act="del" title="Delete">🗑</button></div></div>`;
+}
+function openLifeEditor(kind, item){
+ const cfg = {
+  goals: { head: 'Goal', fields: [{k:'title',label:'Goal',ph:'Run a 10K'},{k:'target',label:'Target / deadline (optional)',ph:'by June 2027'},{k:'progress',label:'Progress % (0-100)',type:'number',ph:'0'}] },
+  timeline: { head: 'Timeline Entry', fields: [{k:'date',label:'Date',type:'date'},{k:'title',label:'Title',ph:'What happened'},{k:'desc',label:'Details',type:'textarea'}] },
+  records: { head: 'Record', fields: [{k:'title',label:'Title',ph:'Medical, certificates, IDs…'},{k:'body',label:'Details',type:'textarea'}] }
+ }[kind];
+ openForm((item ? 'Edit ' : 'New ') + cfg.head, cfg.fields, item || {}, vals => {
+  if (!vals.title) { toast('Give it a title', true); return false; }
+  if (kind === 'goals') vals.progress = Math.max(0, Math.min(100, parseInt(vals.progress||0,10)||0));
+  if (item) Object.assign(item, vals, {updated: Date.now()});
+  else (D().life[kind] || (D().life[kind] = [])).push(Object.assign({id: IVEDB.uid(), updated: Date.now()}, vals));
+  IVEDB.save(); render(); toast('Saved ✓');
+ },
+ item ? () => { if (confirm('Delete this ' + cfg.head.toLowerCase() + '?')) { D().life[kind] = (D().life[kind]||[]).filter(x => x.id !== item.id); IVEDB.save(); closeModal(); render(); toast('Deleted'); } } : null);
+}
+
+/* ---------------- backup ---------------- */
+function exportData(){
+ try {
+  const blob = new Blob([JSON.stringify(D(), null, 2)], {type: 'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'ivehub-backup-' + todayStr() + '.json';
+  a.click();
+  setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  toast('Backup downloaded ✓');
+ } catch (e) { toast('Export failed: ' + e.message, true); }
+}
 function projCard(p){
  const prog = p.status==='done' ? 100 : (p.progress||0);
  return `<div class="glass icard" data-kind="project" data-id="${esc(p.id)}">
@@ -468,6 +655,18 @@ document.getElementById('view').addEventListener('click', e => {
  if (addp) return openProjectEditor(null);
  const addb = e.target.closest('[data-addbrain]');
  if (addb) return openBrainEditor(addb.dataset.addbrain, null);
+ const addt = e.target.closest('[data-addtech]');
+ if (addt) return openTechEditor(addt.dataset.addtech, null);
+ const addl = e.target.closest('[data-addlife]');
+ if (addl) return openLifeEditor(addl.dataset.addlife, null);
+ const sw = e.target.closest('[data-accent]');
+ if (sw) { (D().settings || (D().settings = {})).accent = sw.dataset.accent; IVEDB.save(); applySettings(); render(); toast('Accent updated ✓'); return; }
+ const cmp = e.target.closest('[data-compact]');
+ if (cmp) { const s = D().settings || {}; s.compact = !s.compact; D().settings = s; IVEDB.save(); applySettings(); render(); return; }
+ const dtg = e.target.closest('[data-dash]');
+ if (dtg) { const s = D().settings || {}; s.dash = s.dash || {}; s.dash[dtg.dataset.dash] = s.dash[dtg.dataset.dash] === false; IVEDB.save(); render(); toast('Dashboard updated ✓'); return; }
+ const exp = e.target.closest('[data-export]');
+ if (exp) { exportData(); return; }
  const iact = e.target.closest('.icard [data-act]');
  if (iact) {
   const card = iact.closest('.icard'), kind = card.dataset.kind, id = card.dataset.id, act = iact.dataset.act;
@@ -477,6 +676,18 @@ document.getElementById('view').addEventListener('click', e => {
    else if (act === 'reopen') { p.status = 'active'; p.doneAt = null; p.updated = Date.now(); IVEDB.save(); render(); toast('Reopened'); }
    else if (act === 'edit') openProjectEditor(p);
    else if (act === 'del') { if (confirm('Delete "'+p.title+'"?')) { D().projects = D().projects.filter(x => x.id !== id); IVEDB.save(); render(); toast('Deleted'); } }
+  } else if (TECH[kind]) {
+   const list = D().tech[kind] || [];
+   const item = list.find(x => x.id === id); if (!item) return;
+   if (act === 'edit') openTechEditor(kind, item);
+   else if (act === 'del') { if (confirm('Delete "'+item.name+'"?')) { D().tech[kind] = list.filter(x => x.id !== id); IVEDB.save(); render(); toast('Deleted'); } }
+  } else if (kind === 'goals' || kind === 'timeline' || kind === 'records') {
+   const list = D().life[kind] || [];
+   const item = list.find(x => x.id === id); if (!item) return;
+   if (act === 'edit') openLifeEditor(kind, item);
+   else if (act === 'done' && kind === 'goals') { item.done = true; item.doneAt = Date.now(); item.progress = 100; item.updated = Date.now(); IVEDB.save(); render(); toast('Goal achieved 🎉'); }
+   else if (act === 'undone' && kind === 'goals') { item.done = false; item.doneAt = null; item.updated = Date.now(); IVEDB.save(); render(); }
+   else if (act === 'del') { if (confirm('Delete "'+item.title+'"?')) { D().life[kind] = list.filter(x => x.id !== id); IVEDB.save(); render(); toast('Deleted'); } }
   } else {
    const list = D().brain[kind] || [];
    const item = list.find(x => x.id === id); if (!item) return;
@@ -509,6 +720,20 @@ document.getElementById('view').addEventListener('click', e => {
  if (e.target.id === 'modal') closeModal();
 });
 document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
+document.getElementById('view').addEventListener('change', e => {
+ if (e.target.id !== 'impfile') return;
+ const f = e.target.files[0]; if (!f) return;
+ const r = new FileReader();
+ r.onload = () => {
+  try {
+   const d = JSON.parse(r.result);
+   if (!d || typeof d !== 'object') throw new Error('not an IVEHUB backup');
+   if (!confirm('Replace ALL current data with this backup?')) return;
+   IVEDB.replace(d); applySettings(); render(); toast('Backup restored ✓');
+  } catch (err) { toast('Import failed: ' + err.message, true); }
+ };
+ r.readAsText(f);
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 document.getElementById('view').addEventListener('input', e => {
  if (e.target.id !== 'appsearch') return;
@@ -545,6 +770,7 @@ document.getElementById('burger').onclick = () => { document.getElementById('sid
 document.getElementById('scrim').onclick = () => { document.getElementById('sidebar').classList.remove('open'); document.getElementById('scrim').classList.remove('show'); };
 window.addEventListener('hashchange', render);
 buildNav();
+applySettings();
 driveUi();
 render();
 </script></body></html>

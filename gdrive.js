@@ -37,6 +37,7 @@ window.IVEDB = (function () {
       brain: { notes: [], ideas: [], knowledge: [], bookmarks: [] },
       tech: { servers: [], domains: [], devices: [], tools: [] },
       life: { goals: [], timeline: [], records: [] },
+      settings: { accent: '', compact: false, dash: { usage: true, favs: true, recent: true } },
       updated: 0
     };
   }
@@ -63,6 +64,8 @@ window.IVEDB = (function () {
     for (const k of Object.keys(b.brain)) b.brain[k] = Array.isArray(d.brain && d.brain[k]) ? d.brain[k] : [];
     for (const k of Object.keys(b.tech)) b.tech[k] = Array.isArray(d.tech && d.tech[k]) ? d.tech[k] : [];
     for (const k of Object.keys(b.life)) b.life[k] = Array.isArray(d.life && d.life[k]) ? d.life[k] : [];
+    b.settings = Object.assign({ accent: '', compact: false }, d.settings || {});
+    b.settings.dash = Object.assign({ usage: true, favs: true, recent: true }, (d.settings && d.settings.dash) || {});
     b.updated = d.updated || 0;
     return b;
   }
@@ -84,6 +87,8 @@ window.IVEDB = (function () {
   }
 
   function data() { return state; }
+
+  function replace(d) { state = normalize(d); save(); }
 
   function emit() { listeners.forEach(fn => { try { fn(state); } catch (e) {} }); }
 
@@ -206,5 +211,5 @@ window.IVEDB = (function () {
 
   init();
 
-  return { data, save, connect, disconnect, status, uid, onChange };
+  return { data, save, connect, disconnect, status, uid, onChange, replace };
 })();

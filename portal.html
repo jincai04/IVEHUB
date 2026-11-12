@@ -257,7 +257,7 @@ const VIEWS = {
   const hr = new Date().getHours();
   const greet = hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
   return `<div class="ph"><h1>My Dashboard</h1><div class="sub">${greet}, Boss — ${new Date().toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div>
-  ${showU?`<div class="h2">⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span></div>
+  ${showU?`<div class="h2">⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span><button class="abtn" id="refreshusage" title="Refresh token usage" style="font-size:1rem;color:#7c96b4">⟳</button></div>
   <div class="usage" id="usagecards"><div class="glass card" style="color:#8aa0b8">loading…</div></div>`:''}
   ${showF&&favs.length?`<div class="h2">⭐ Quick Access</div><div class="hflex">${favs.map(a=>chipHtml({icon:a.icon,name:a.name,url:a.url,ts:Date.now()})).join('').replaceAll("just now",'favorite')}</div>`:''}
   ${showR&&rec.length?`<div class="h2">🕘 Recently Opened</div><div class="hflex">${rec.map(chipHtml).join('')}</div>`:''}`;
@@ -632,7 +632,17 @@ function render(){
   const label = (s && s.subs.find(x => x[0]===sub) || [,''])[1];
   view.innerHTML = s ? ph(label || sec, '', s.phase || 2) : ph('Page not found', '');
  }
- if (sec==='home' && sub==='dashboard') loadUsage();
+ if (sec==='home' && sub==='dashboard') {
+  loadUsage();
+  const rb = document.getElementById('refreshusage');
+  if (rb) rb.onclick = () => {
+   const cards = document.getElementById('usagecards');
+   if (cards) cards.innerHTML = '<div class="glass card" style="color:#8aa0b8">refreshing…</div>';
+   rb.style.transition = 'transform .6s ease'; rb.style.transform = 'rotate(360deg)';
+   setTimeout(() => { rb.style.transition = 'none'; rb.style.transform = 'none'; }, 650);
+   loadUsage();
+  };
+ }
  if (sec==='home' && sub==='recent') { renderRecentChips(); const c = document.getElementById('clearh'); if (c) c.onclick = () => { try{localStorage.removeItem(HKEY);}catch(e){} renderRecentChips(); toast('History cleared'); }; }
  tick();
  document.getElementById('sidebar').classList.remove('open');

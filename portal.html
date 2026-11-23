@@ -112,6 +112,10 @@
  .fill.danger{background:linear-gradient(90deg,#ef4444,#f87171);box-shadow:0 0 16px rgba(248,113,113,.6)}
  .meta{color:#8aa0b8;font-size:.76rem;margin-top:12px}
  .planchip{display:inline-block;background:rgba(56,189,248,.12);border:1px solid rgba(56,189,248,.3);color:#7dd3fc;padding:2px 12px;border-radius:99px;font-size:.68rem;margin-left:8px;vertical-align:middle;letter-spacing:1px}
+.rfrbtn{background:none;border:1px solid transparent;color:#7c96b4;font-size:.68rem;letter-spacing:1px;cursor:pointer;padding:4px 12px;border-radius:99px;transition:all .25s;flex:none}
+.rfrbtn:hover{color:var(--acc);border-color:var(--accbrd);background:var(--accbg)}
+.rfrbtn.spin{animation:spin .8s linear infinite;pointer-events:none;opacity:.6}
+@keyframes spin{to{transform:rotate(360deg)}}
  /* ---------- misc views ---------- */
  .h2{font-size:.75rem;color:#7c96b4;margin:26px 0 12px;letter-spacing:3px;text-transform:uppercase;display:flex;align-items:center;gap:12px}
  .h2::after{content:'';flex:1;height:1px;background:linear-gradient(90deg,rgba(125,211,252,.35),transparent)}
@@ -245,7 +249,9 @@ async function loadUsage(){
   }
  } catch(e) {
   el.innerHTML = `<div class="glass card" style="color:#8aa0b8">⚠ Token API unreachable${TOKEN_API===''?' (not configured in config.js)':''} — ${esc(e.message)}</div>`;
+  return false;
  }
+ return true;
 }
 
 /* ---------------- views ---------------- */
@@ -257,7 +263,7 @@ const VIEWS = {
   const hr = new Date().getHours();
   const greet = hr<12?'Good morning':hr<18?'Good afternoon':'Good evening';
   return `<div class="ph"><h1>My Dashboard</h1><div class="sub">${greet}, Boss — ${new Date().toLocaleDateString('en-MY',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</div></div>
-  ${showU?`<div class="h2">⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span></div>
+  ${showU?`<div class="h2">⚡ OpenClaw Token Usage <span class="planchip" id="plan"></span><button class="rfrbtn" data-refreshusage="1" title="Refresh token usage">⟳ REFRESH</button></div>
   <div class="usage" id="usagecards"><div class="glass card" style="color:#8aa0b8">loading…</div></div>`:''}
   ${showF&&favs.length?`<div class="h2">⭐ Quick Access</div><div class="hflex">${favs.map(a=>chipHtml({icon:a.icon,name:a.name,url:a.url,ts:Date.now()})).join('').replaceAll("just now",'favorite')}</div>`:''}
   ${showR&&rec.length?`<div class="h2">🕘 Recently Opened</div><div class="hflex">${rec.map(chipHtml).join('')}</div>`:''}`;
@@ -667,6 +673,8 @@ document.getElementById('view').addEventListener('click', e => {
  if (dtg) { const s = D().settings || {}; s.dash = s.dash || {}; s.dash[dtg.dataset.dash] = s.dash[dtg.dataset.dash] === false; IVEDB.save(); render(); toast('Dashboard updated ✓'); return; }
  const exp = e.target.closest('[data-export]');
  if (exp) { exportData(); return; }
+ const rf = e.target.closest('[data-refreshusage]');
+ if (rf) { rf.classList.add('spin'); loadUsage().then(ok => { rf.classList.remove('spin'); toast(ok ? 'Usage refreshed ✓' : 'Refresh failed — Token API unreachable', !ok); }); return; }
  const iact = e.target.closest('.icard [data-act]');
  if (iact) {
   const card = iact.closest('.icard'), kind = card.dataset.kind, id = card.dataset.id, act = iact.dataset.act;

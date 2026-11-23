@@ -781,4 +781,6 @@ buildNav();
 applySettings();
 driveUi();
 render();
+/* silent Drive reconnect: pulls newest ivehub-data.json on devices that already consented */
+IVEDB.tryAutoConnect().then(ok => { if (ok) { applySettings(); driveUi(); render(); } });
 </script></body></html>

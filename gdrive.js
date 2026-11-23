@@ -11,6 +11,7 @@
 window.IVEDB = (function () {
   const LS_DATA = 'ivehub_data';
   const LS_FILEID = 'ivehub_drive_fileid';
+  const LS_OPTOUT = 'ivehub_drive_optout';
   const DRIVE_FILENAME = 'ivehub-data.json';
   const SCOPE = 'https://www.googleapis.com/auth/drive.file';
   const CFG = () => window.IVEHUB_CONFIG || {};
@@ -118,6 +119,7 @@ window.IVEDB = (function () {
   function connect() {
     const cid = GOOGLE().clientId;
     if (!cid) return Promise.reject(new Error('Google Client ID not set — add google.clientId in config.js (see README)'));
+    lsDel(LS_OPTOUT);
     return new Promise((res, rej) => {
       loadGsi().then(() => {
         const client = window.google.accounts.oauth2.initTokenClient({
@@ -137,7 +139,15 @@ window.IVEDB = (function () {
   function disconnect() {
     token = null; connected = false; fileId = null; lastSync = null;
     lsDel(LS_FILEID);
+    lsSet(LS_OPTOUT, '1');
     emit();
+  }
+
+  // Silent reconnect on page load — works only if this browser already consented;
+  // never opens a popup (blocked without user gesture anyway). Respects opt-out.
+  function tryAutoConnect() {
+    if (!GOOGLE().clientId || lsGet(LS_OPTOUT)) return Promise.resolve(false);
+    return connect().then(() => true).catch(() => false);
   }
 
   function api(url, opts) {
@@ -211,5 +221,5 @@ window.IVEDB = (function () {
 
   init();
 
-  return { data, save, connect, disconnect, status, uid, onChange, replace };
+  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace };
 })();

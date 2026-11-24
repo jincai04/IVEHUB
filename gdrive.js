@@ -217,9 +217,61 @@ window.IVEDB = (function () {
     return { connected, fileId, clientIdSet: !!GOOGLE().clientId, lastSync };
   }
 
+  // ---------- Drive files (photos & documents) ----------
+  // Separate real files in an "IVEZONE Files" folder in the user's Drive,
+  // so photos/documents sync across devices without bloating the JSON blob.
+  const FILES_FOLDER = 'IVEZONE Files';
+  let filesFolderId = null;
+
+  function filesReady() { return connected && !!token; }
+
+  function filesFindFolder() {
+    const q = encodeURIComponent("name='" + FILES_FOLDER + "' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+    return api('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id)&pageSize=5')
+      .then(r => r.json())
+      .then(j => (j.files && j.files.length) ? j.files[0].id : null);
+  }
+
+  function filesEnsureFolder() {
+    if (filesFolderId) return Promise.resolve(filesFolderId);
+    return filesFindFolder().then(fid => {
+      if (fid) { filesFolderId = fid; return fid; }
+      return api('https://www.googleapis.com/drive/v3/files?fields=id', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: FILES_FOLDER, mimeType: 'application/vnd.google-apps.folder' })
+      }).then(r => r.json()).then(j => { filesFolderId = j.id; return j.id; });
+    });
+  }
+
+  function filesList() {
+    return filesEnsureFolder().then(fid => {
+      const q = encodeURIComponent("'" + fid + "' in parents and trashed=false");
+      const order = encodeURIComponent('createdTime desc');
+      return api('https://www.googleapis.com/drive/v3/files?q=' + q + '&orderBy=' + order + '&fields=files(id,name,mimeType,size,thumbnailLink,createdTime)&pageSize=200')
+        .then(r => r.json())
+        .then(j => j.files || []);
+    });
+  }
+
+  function filesUpload(blob, name, mimeType) {
+    return filesEnsureFolder().then(fid => {
+      const meta = { name: name, parents: [fid] };
+      const form = new FormData();
+      form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+      form.append('file', blob, name);
+      return api('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size', { method: 'POST', body: form })
+        .then(r => r.json());
+    });
+  }
+
+  function filesDelete(id) {
+    return api('https://www.googleapis.com/drive/v3/files/' + id, { method: 'DELETE' }).then(() => true);
+  }
+
   function onChange(fn) { listeners.push(fn); }
 
   init();
 
-  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace };
+  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace, filesReady, filesList, filesUpload, filesDelete };
 })();

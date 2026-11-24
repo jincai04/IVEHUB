@@ -73,6 +73,7 @@
  .acts2{display:flex;gap:4px;margin-top:10px;border-top:1px solid rgba(255,255,255,.06);padding-top:8px}
  .hrow{display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:8px;animation:fadeUp .4s ease both}
  .hrow .when{color:#5b7189;font-size:.7rem;flex:none;width:72px}
+ .thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;border:1px solid rgba(255,255,255,.12)}
  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
  .stat{padding:16px 22px;text-align:center;flex:1;min-width:120px}
  .stat .n{font-size:1.7rem;font-weight:800;color:var(--acc)}
@@ -182,6 +183,7 @@ const D = () => IVEDB.data();
 const NAV = [
  {id:'home', icon:'🏠', label:'Home', subs:[['dashboard','My Dashboard'],['quick','Quick Access'],['recent','Recently Used'],['today','Today']]},
  {id:'apps', icon:'📁', label:'Applications', subs:[['business','Business Apps'],['databases','Databases'],['personal','Personal Apps'],['development','Development Apps'],['favorites','Favorites']]},
+ {id:'files', icon:'🗂️', label:'Files', subs:[['myfiles','My Files'],['photos','Photos']]},
  {id:'projects', icon:'🚀', label:'Projects', subs:[['active','Active Projects'],['completed','Completed Projects'],['history','Project History']]},
  {id:'brain', icon:'🧠', label:'My Brain', subs:[['notes','Notes'],['ideas','Ideas'],['knowledge','Knowledge'],['bookmarks','Bookmarks']]},
  {id:'tech', icon:'🖥️', label:'My Tech', subs:[['servers','Servers'],['domains','Domains'],['devices','Devices'],['tools','Tools']]},
@@ -253,6 +255,37 @@ async function loadUsage(){
  return true;
 }
 
+/* ---------------- drive files (upload / photos) ---------------- */
+function fmtSize(b){ if (b == null) return '?'; const u = ['B','KB','MB','GB']; let i = 0, n = +b; while (n >= 1024 && i < u.length-1) { n /= 1024; i++; } return (i ? n.toFixed(1) : n) + ' ' + u[i]; }
+function fileIcon(m){ m = m || ''; if (m.indexOf('image/') === 0) return '🖼️'; if (m.indexOf('pdf') >= 0) return '📕'; if (m.indexOf('spreadsheet') >= 0 || m.indexOf('excel') >= 0 || m.indexOf('csv') >= 0) return '📊'; if (m.indexOf('word') >= 0 || m.indexOf('document') >= 0) return '📝'; if (m.indexOf('zip') >= 0 || m.indexOf('rar') >= 0 || m.indexOf('7z') >= 0) return '🗜️'; if (m.indexOf('video/') === 0) return '🎬'; if (m.indexOf('audio/') === 0) return '🎵'; return '📄'; }
+function filesView(mode){
+ const isPhoto = mode === 'image';
+ return `<div class="ph"><h1>${isPhoto ? 'Photos' : 'My Files'}</h1><div class="sub">${isPhoto ? 'Your uploaded pictures — stored in your Google Drive' : 'Upload photos & documents — stored in your Google Drive, same on every device'}</div></div>
+ <div class="tools"><label class="addbtn" style="cursor:pointer">⬆ UPLOAD ${isPhoto ? 'PHOTOS' : 'FILES'}<input type="file" id="fileup" ${isPhoto ? 'accept="image/*"' : ''} multiple style="display:none"></label><span class="icard-meta" id="filestat"></span></div>
+ <div class="grid" id="filegrid"><div class="empty" style="grid-column:1/-1">loading…</div></div>`;
+}
+function loadFiles(mode){
+ const grid = document.getElementById('filegrid'); if (!grid) return;
+ const st = document.getElementById('filestat');
+ if (!IVEDB.filesReady()) {
+  grid.innerHTML = '<div class="empty" style="grid-column:1/-1">☁ Connect Drive (sidebar) to upload files — they will sync across all your devices.</div>';
+  if (st) st.textContent = 'Drive not connected';
+  return;
+ }
+ IVEDB.filesList().then(list => {
+  const items = mode === 'image' ? list.filter(f => (f.mimeType || '').indexOf('image/') === 0) : list;
+  const st2 = document.getElementById('filestat'); if (st2) st2.textContent = items.length + ' item' + (items.length === 1 ? '' : 's') + ' in Drive';
+  if (!items.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">Nothing uploaded yet — click ⬆ UPLOAD.</div>'; return; }
+  grid.innerHTML = items.map(f => `<div class="glass icard acard" data-fileid="${esc(f.id)}">
+   ${f.thumbnailLink ? `<img class="thumb" src="${esc(f.thumbnailLink)}" alt="">` : `<span class="ico">${fileIcon(f.mimeType)}</span>`}
+   <a class="applink" href="https://drive.google.com/file/d/${esc(f.id)}/view" target="_blank" rel="noopener"><span class="txt"><span class="nm">${esc(f.name)}</span><span class="desc">${fmtSize(f.size)} · ${f.createdTime ? new Date(f.createdTime).toLocaleDateString('en-MY', {day:'numeric',month:'short',year:'numeric'}) : ''}</span></span></a>
+   <div class="acts"><button class="abtn del" data-fdel="1" title="Delete from Drive">🗑</button></div></div>`).join('');
+ }).catch(e => {
+  grid.innerHTML = `<div class="empty" style="grid-column:1/-1">⚠ Could not list Drive files — ${esc(e.message)}</div>`;
+  const st3 = document.getElementById('filestat'); if (st3) st3.textContent = '';
+ });
+}
+
 /* ---------------- views ---------------- */
 const VIEWS = {
  'home/dashboard'(){
@@ -287,6 +320,8 @@ const VIEWS = {
   <div class="h2">📅 Today's Timeline</div>
   ${tl.length ? `<div class="grid">${tl.map(tlCard).join('')}</div>` : '<div class="empty" style="margin-top:4px">Nothing on today\'s timeline — add entries in My Life → Timeline.</div>'}`;
  },
+ 'files/myfiles'(){ return filesView('all'); },
+ 'files/photos'(){ return filesView('image'); },
  'projects/active'(){
   const list = D().projects.filter(p => p.status !== 'done').sort((a,b) => (b.updated||0)-(a.updated||0));
   return `<div class="ph"><h1>Active Projects</h1><div class="sub">${list.length} in progress</div></div>
@@ -638,6 +673,7 @@ function render(){
   view.innerHTML = s ? ph(label || sec, '', s.phase || 2) : ph('Page not found', '');
  }
  if (sec==='home' && sub==='dashboard') loadUsage();
+ if (sec==='files') loadFiles(sub === 'photos' ? 'image' : 'all');
  if (sec==='home' && sub==='recent') { renderRecentChips(); const c = document.getElementById('clearh'); if (c) c.onclick = () => { try{localStorage.removeItem(HKEY);}catch(e){} renderRecentChips(); toast('History cleared'); }; }
  tick();
  document.getElementById('sidebar').classList.remove('open');
@@ -674,6 +710,13 @@ document.getElementById('view').addEventListener('click', e => {
  if (exp) { exportData(); return; }
  const rf = e.target.closest('[data-refreshusage]');
  if (rf) { rf.classList.add('spin'); loadUsage().then(ok => { rf.classList.remove('spin'); toast(ok ? 'Usage refreshed ✓' : 'Refresh failed — Token API unreachable', !ok); }); return; }
+ const fdel = e.target.closest('[data-fdel]');
+ if (fdel) {
+  const card = fdel.closest('[data-fileid]'); const fid = card ? card.dataset.fileid : null; if (!fid) return;
+  if (!confirm('Delete this file from Google Drive? It stays in your Drive trash for 30 days.')) return;
+  IVEDB.filesDelete(fid).then(() => { render(); toast('Deleted from Drive'); }).catch(err => toast('Delete failed: ' + err.message, true));
+  return;
+ }
  const iact = e.target.closest('.icard [data-act]');
  if (iact) {
   const card = iact.closest('.icard'), kind = card.dataset.kind, id = card.dataset.id, act = iact.dataset.act;
@@ -728,6 +771,22 @@ document.getElementById('view').addEventListener('click', e => {
 });
 document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 document.getElementById('view').addEventListener('change', e => {
+ if (e.target.id === 'fileup') {
+  const files = Array.from(e.target.files || []); e.target.value = '';
+  if (!files.length) return;
+  if (!IVEDB.filesReady()) return toast('Connect Drive first (sidebar button)', true);
+  let done = 0, fail = 0;
+  toast('Uploading ' + files.length + ' file' + (files.length === 1 ? '' : 's') + ' to Drive…');
+  (async () => {
+   for (const f of files) {
+    try { await IVEDB.filesUpload(f, f.name, f.type || 'application/octet-stream'); done++; }
+    catch (err) { fail++; toast('Upload failed: ' + f.name + ' — ' + err.message, true); }
+   }
+   if (done) toast(done + ' file' + (done === 1 ? '' : 's') + ' uploaded to Drive ✓');
+   if (document.getElementById('filegrid')) render();
+  })();
+  return;
+ }
  if (e.target.id !== 'impfile') return;
  const f = e.target.files[0]; if (!f) return;
  const r = new FileReader();

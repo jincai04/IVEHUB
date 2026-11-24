@@ -12,6 +12,7 @@ Data syncs through the user's own Google Drive (optional — works without it us
 
 ## Sections
 - **Home** — My Dashboard (token usage + favorites + recent), Quick Access, Recently Used, Today
+- **Files** — My Files / Photos — uploads go to an "IVEZONE Files" folder in your Google Drive (needs Drive connected), so the same files show on every device. Opens/downloads via drive.google.com links.
 - **Applications** — Business Apps / Databases (seeded from the old MGM, Lunar, MODU & Database hubs), Personal, Development, Favorites (★ any app)
 - **Projects / My Brain** — Phase 2 (structure visible in the sidebar)
 - **My Tech / My Life / Settings** — Phase 3

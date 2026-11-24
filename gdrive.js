@@ -217,61 +217,85 @@ window.IVEDB = (function () {
     return { connected, fileId, clientIdSet: !!GOOGLE().clientId, lastSync };
   }
 
-  // ---------- Drive files (photos & documents) ----------
-  // Separate real files in an "IVEZONE Files" folder in the user's Drive,
-  // so photos/documents sync across devices without bloating the JSON blob.
+  // ---------- Drive folders & files (uploads, photos, code repos) ----------
+  // Real files in the user's Drive: "IVEZONE Files" for uploads/photos,
+  // "IVEZONE Code" root with one subfolder per code repo.
   const FILES_FOLDER = 'IVEZONE Files';
-  let filesFolderId = null;
+  const CODE_ROOT = 'IVEZONE Code';
+  const folderCache = {};
 
   function filesReady() { return connected && !!token; }
 
-  function filesFindFolder() {
-    const q = encodeURIComponent("name='" + FILES_FOLDER + "' and mimeType='application/vnd.google-apps.folder' and trashed=false");
+  function findFolder(name) {
+    if (folderCache[name]) return Promise.resolve(folderCache[name]);
+    const q = encodeURIComponent("name='" + name + "' and mimeType='application/vnd.google-apps.folder' and trashed=false");
     return api('https://www.googleapis.com/drive/v3/files?q=' + q + '&fields=files(id)&pageSize=5')
       .then(r => r.json())
       .then(j => (j.files && j.files.length) ? j.files[0].id : null);
   }
 
-  function filesEnsureFolder() {
-    if (filesFolderId) return Promise.resolve(filesFolderId);
-    return filesFindFolder().then(fid => {
-      if (fid) { filesFolderId = fid; return fid; }
+  function ensureFolder(name) {
+    return findFolder(name).then(fid => {
+      if (fid) { folderCache[name] = fid; return fid; }
       return api('https://www.googleapis.com/drive/v3/files?fields=id', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: FILES_FOLDER, mimeType: 'application/vnd.google-apps.folder' })
-      }).then(r => r.json()).then(j => { filesFolderId = j.id; return j.id; });
+        body: JSON.stringify({ name: name, mimeType: 'application/vnd.google-apps.folder' })
+      }).then(r => r.json()).then(j => { folderCache[name] = j.id; return j.id; });
     });
   }
 
-  function filesList() {
-    return filesEnsureFolder().then(fid => {
-      const q = encodeURIComponent("'" + fid + "' in parents and trashed=false");
-      const order = encodeURIComponent('createdTime desc');
-      return api('https://www.googleapis.com/drive/v3/files?q=' + q + '&orderBy=' + order + '&fields=files(id,name,mimeType,size,thumbnailLink,createdTime)&pageSize=200')
-        .then(r => r.json())
-        .then(j => j.files || []);
-    });
+  function listIn(parentId, fields) {
+    const q = encodeURIComponent("'" + parentId + "' in parents and trashed=false");
+    return api('https://www.googleapis.com/drive/v3/files?q=' + q + '&orderBy=' + encodeURIComponent('createdTime desc') + '&fields=' + encodeURIComponent(fields) + '&pageSize=200')
+      .then(r => r.json())
+      .then(j => j.files || []);
   }
 
-  function filesUpload(blob, name, mimeType) {
-    return filesEnsureFolder().then(fid => {
-      const meta = { name: name, parents: [fid] };
-      const form = new FormData();
-      form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
-      form.append('file', blob, name);
-      return api('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size', { method: 'POST', body: form })
-        .then(r => r.json());
-    });
+  function uploadTo(parentId, blob, name, mimeType) {
+    const meta = { name: name, parents: [parentId] };
+    const form = new FormData();
+    form.append('metadata', new Blob([JSON.stringify(meta)], { type: 'application/json' }));
+    form.append('file', blob, name);
+    return api('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,size', { method: 'POST', body: form })
+      .then(r => r.json());
   }
 
+  function trashFile(id) {
+    return api('https://www.googleapis.com/drive/v3/files/' + id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ trashed: true })
+    }).then(() => true);
+  }
+
+  function filesList() { return ensureFolder(FILES_FOLDER).then(fid => listIn(fid, 'files(id,name,mimeType,size,thumbnailLink,createdTime)')); }
+  function filesUpload(blob, name, mimeType) { return ensureFolder(FILES_FOLDER).then(fid => uploadTo(fid, blob, name, mimeType)); }
   function filesDelete(id) {
     return api('https://www.googleapis.com/drive/v3/files/' + id, { method: 'DELETE' }).then(() => true);
   }
+
+  // Code repos: one Drive subfolder per repo under "IVEZONE Code"
+  function reposList() {
+    return ensureFolder(CODE_ROOT).then(fid => listIn(fid, 'files(id,name,description,modifiedTime)'));
+  }
+
+  function repoCreate(name, desc) {
+    return ensureFolder(CODE_ROOT).then(fid => api('https://www.googleapis.com/drive/v3/files?fields=id,name,description', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: name, description: desc || '', mimeType: 'application/vnd.google-apps.folder', parents: [fid] })
+    }).then(r => r.json()));
+  }
+
+  function repoTrash(id) { return trashFile(id); }
+  function repoFiles(repoId) { return listIn(repoId, 'files(id,name,mimeType,size,modifiedTime)'); }
+  function repoFileUpload(repoId, blob, name, mimeType) { return uploadTo(repoId, blob, name, mimeType); }
+  function repoFileTrash(fileId) { return trashFile(fileId); }
 
   function onChange(fn) { listeners.push(fn); }
 
   init();
 
-  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace, filesReady, filesList, filesUpload, filesDelete };
+  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace, filesReady, filesList, filesUpload, filesDelete, reposList, repoCreate, repoTrash, repoFiles, repoFileUpload, repoFileTrash };
 })();

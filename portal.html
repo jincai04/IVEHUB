@@ -74,6 +74,11 @@
  .hrow{display:flex;align-items:center;gap:12px;padding:12px 16px;margin-bottom:8px;animation:fadeUp .4s ease both}
  .hrow .when{color:#5b7189;font-size:.7rem;flex:none;width:72px}
  .thumb{width:44px;height:44px;border-radius:10px;object-fit:cover;flex:none;border:1px solid rgba(255,255,255,.12)}
+ .filetable{display:flex;flex-direction:column;gap:8px}
+ .frow{display:flex;align-items:center;gap:12px;padding:11px 16px}
+ .frow .fname{color:var(--acc);text-decoration:none;font-weight:600;font-size:.88rem;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+ .frow .fname:hover{text-decoration:underline}
+ .frow .fmeta{color:#5b7189;font-size:.7rem;flex:none}
  .stats{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:18px}
  .stat{padding:16px 22px;text-align:center;flex:1;min-width:120px}
  .stat .n{font-size:1.7rem;font-weight:800;color:var(--acc)}
@@ -184,6 +189,7 @@ const NAV = [
  {id:'home', icon:'🏠', label:'Home', subs:[['dashboard','My Dashboard'],['quick','Quick Access'],['recent','Recently Used'],['today','Today']]},
  {id:'apps', icon:'📁', label:'Applications', subs:[['business','Business Apps'],['databases','Databases'],['personal','Personal Apps'],['development','Development Apps'],['favorites','Favorites']]},
  {id:'files', icon:'🗂️', label:'Files', subs:[['myfiles','My Files'],['photos','Photos']]},
+ {id:'code', icon:'💻', label:'Code', subs:[['repos','Repositories']]},
  {id:'projects', icon:'🚀', label:'Projects', subs:[['active','Active Projects'],['completed','Completed Projects'],['history','Project History']]},
  {id:'brain', icon:'🧠', label:'My Brain', subs:[['notes','Notes'],['ideas','Ideas'],['knowledge','Knowledge'],['bookmarks','Bookmarks']]},
  {id:'tech', icon:'🖥️', label:'My Tech', subs:[['servers','Servers'],['domains','Domains'],['devices','Devices'],['tools','Tools']]},
@@ -200,8 +206,8 @@ function buildNav(){
 }
 function route(){
  const h = location.hash.replace(/^#\/?/, '') || 'home/dashboard';
- const [sec, sub] = h.split('/');
- return {sec, sub: sub || ''};
+ const parts = h.split('/');
+ return {sec: parts[0], sub: parts[1] || '', param: parts[2] || ''};
 }
 
 /* ---------------- helpers ---------------- */
@@ -286,6 +292,64 @@ function loadFiles(mode){
  });
 }
 
+/* ---------------- code repos ---------------- */
+function repoCard(r){
+ return `<div class="glass icard" data-repoid="${esc(r.id)}">
+  <div class="icard-head"><a class="nm" style="cursor:pointer;text-decoration:none" href="#/code/repo/${esc(r.id)}">📁 ${esc(r.name)}</a></div>
+  ${r.description ? `<div class="bodyprev">${esc(r.description)}</div>` : ''}
+  <div class="icard-meta">updated ${r.modifiedTime ? new Date(r.modifiedTime).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'}) : '?'}</div>
+  <div class="acts2">
+   <a class="abtn" style="text-decoration:none" href="#/code/repo/${esc(r.id)}">open</a>
+   <span style="flex:1"></span>
+   <a class="abtn" style="text-decoration:none" href="https://drive.google.com/drive/folders/${esc(r.id)}" target="_blank" rel="noopener" title="Open folder in Drive">↗ drive</a>
+   <button class="abtn del" data-repotrash="${esc(r.id)}" title="Delete repo">🗑</button>
+  </div></div>`;
+}
+function loadRepos(){
+ const grid = document.getElementById('repogrid'); if (!grid) return;
+ if (!IVEDB.filesReady()) {
+  grid.innerHTML = '<div class="empty" style="grid-column:1/-1">☁ Connect Drive (sidebar) to use Code repos — they sync across all your devices.</div>';
+  const st = document.getElementById('repostat'); if (st) st.textContent = 'Drive not connected';
+  return;
+ }
+ IVEDB.reposList().then(repos => {
+  const st2 = document.getElementById('repostat'); if (st2) st2.textContent = repos.length + ' repo' + (repos.length === 1 ? '' : 's');
+  if (!repos.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No repositories yet — click ＋ NEW REPO to create your first one.</div>'; return; }
+  grid.innerHTML = repos.map(repoCard).join('');
+ }).catch(e => {
+  grid.innerHTML = `<div class="empty" style="grid-column:1/-1">⚠ Could not list repos — ${esc(e.message)}</div>`;
+  const st3 = document.getElementById('repostat'); if (st3) st3.textContent = '';
+ });
+}
+function fileRow(f){
+ return `<div class="glass frow" data-fileid="${esc(f.id)}">
+  <span class="ico">${fileIcon(f.mimeType)}</span>
+  <a class="fname" href="https://drive.google.com/file/d/${esc(f.id)}/view" target="_blank" rel="noopener" title="Open / download">${esc(f.name)}</a>
+  <span class="fmeta">${fmtSize(f.size)} · ${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString('en-MY',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</span>
+  <button class="abtn del" data-codefdel="${esc(f.id)}" title="Delete file">🗑</button>
+ </div>`;
+}
+function loadRepo(fid){
+ if (!IVEDB.filesReady()) {
+  const t = document.getElementById('filetable');
+  if (t) t.innerHTML = '<div class="empty">☁ Connect Drive (sidebar) to view and upload files.</div>';
+  return;
+ }
+ IVEDB.reposList().then(repos => {
+  const r = repos.find(x => x.id === fid);
+  const ti = document.getElementById('repotitle'); if (ti && r) ti.textContent = '📁 ' + r.name;
+  const de = document.getElementById('repodesc'); if (de) de.textContent = r && r.description ? r.description : 'Code files stored in your Google Drive';
+ }).catch(() => {});
+ IVEDB.repoFiles(fid).then(files => {
+  const t = document.getElementById('filetable'); if (!t) return;
+  if (!files.length) { t.innerHTML = '<div class="empty">Repository is empty — click ⬆ UPLOAD FILES to push code, or add files to the Drive folder from any device.</div>'; return; }
+  t.innerHTML = '<div class="filetable">' + files.map(fileRow).join('') + '</div>';
+ }).catch(e => {
+  const t = document.getElementById('filetable');
+  if (t) t.innerHTML = `<div class="empty">⚠ Could not list files — ${esc(e.message)}</div>`;
+ });
+}
+
 /* ---------------- views ---------------- */
 const VIEWS = {
  'home/dashboard'(){
@@ -322,6 +386,20 @@ const VIEWS = {
  },
  'files/myfiles'(){ return filesView('all'); },
  'files/photos'(){ return filesView('image'); },
+ 'code/repos'(){
+  return `<div class="ph"><h1>Repositories</h1><div class="sub">GitHub-style code repos — each one is a folder in your Google Drive ("IVEZONE Code"), same on every device</div></div>
+  <div class="tools"><button class="addbtn" data-newrepo="1">＋ NEW REPO</button><span class="icard-meta" id="repostat"></span></div>
+  <div class="grid" id="repogrid"><div class="empty" style="grid-column:1/-1">loading…</div></div>`;
+ },
+ 'code/repo'(){
+  const fid = route().param;
+  return `<div class="ph"><h1 id="repotitle">Repository</h1><div class="sub" id="repodesc">loading…</div></div>
+  <div class="tools"><label class="addbtn" style="cursor:pointer">⬆ UPLOAD FILES<input type="file" id="fileup" data-repo="${esc(fid)}" multiple style="display:none"></label>
+  <a class="btn" href="https://drive.google.com/drive/folders/${esc(fid)}" target="_blank" rel="noopener">OPEN IN DRIVE ↗</a>
+  <button class="btn" data-repotrash="${esc(fid)}" data-back="1">🗑 DELETE REPO</button>
+  <a class="btn" href="#/code/repos">← ALL REPOS</a></div>
+  <div id="filetable"><div class="empty">loading…</div></div>`;
+ },
  'projects/active'(){
   const list = D().projects.filter(p => p.status !== 'done').sort((a,b) => (b.updated||0)-(a.updated||0));
   return `<div class="ph"><h1>Active Projects</h1><div class="sub">${list.length} in progress</div></div>
@@ -674,6 +752,8 @@ function render(){
  }
  if (sec==='home' && sub==='dashboard') loadUsage();
  if (sec==='files') loadFiles(sub === 'photos' ? 'image' : 'all');
+ if (sec==='code' && sub==='repos') loadRepos();
+ if (sec==='code' && sub==='repo') loadRepo(route().param);
  if (sec==='home' && sub==='recent') { renderRecentChips(); const c = document.getElementById('clearh'); if (c) c.onclick = () => { try{localStorage.removeItem(HKEY);}catch(e){} renderRecentChips(); toast('History cleared'); }; }
  tick();
  document.getElementById('sidebar').classList.remove('open');
@@ -715,6 +795,36 @@ document.getElementById('view').addEventListener('click', e => {
   const card = fdel.closest('[data-fileid]'); const fid = card ? card.dataset.fileid : null; if (!fid) return;
   if (!confirm('Delete this file from Google Drive? It stays in your Drive trash for 30 days.')) return;
   IVEDB.filesDelete(fid).then(() => { render(); toast('Deleted from Drive'); }).catch(err => toast('Delete failed: ' + err.message, true));
+  return;
+ }
+ const nrep = e.target.closest('[data-newrepo]');
+ if (nrep) {
+  if (!IVEDB.filesReady()) return toast('Connect Drive first (sidebar button)', true);
+  IVEDB.reposList().then(repos => openForm('New Repository',
+   [{k:'name',label:'Repository name',ph:'my-project'},{k:'desc',label:'Description (optional)',ph:'What this code is for'}],
+   {},
+   vals => {
+    const name = vals.name.trim();
+    if (!name) { toast('Give the repo a name', true); return false; }
+    if (repos.some(r => r.name.toLowerCase() === name.toLowerCase())) { toast('A repo with that name already exists', true); return false; }
+    IVEDB.repoCreate(name, vals.desc.trim()).then(() => { toast('Repository created ✓'); render(); }).catch(err => toast('Create failed: ' + err.message, true));
+   }));
+  return;
+ }
+ const rtr = e.target.closest('[data-repotrash]');
+ if (rtr) {
+  const rid = rtr.dataset.repotrash;
+  if (!confirm('Delete this repository? Everything in it stays recoverable in your Drive trash for 30 days.')) return;
+  IVEDB.repoTrash(rid).then(() => {
+   if (rtr.dataset.back) { location.hash = '#/code/repos'; } else { render(); }
+   toast('Repository moved to Drive trash');
+  }).catch(err => toast('Delete failed: ' + err.message, true));
+  return;
+ }
+ const cfd = e.target.closest('[data-codefdel]');
+ if (cfd) {
+  if (!confirm('Move this file to Drive trash?')) return;
+  IVEDB.repoFileTrash(cfd.dataset.codefdel).then(() => { render(); toast('File moved to trash'); }).catch(err => toast('Delete failed: ' + err.message, true));
   return;
  }
  const iact = e.target.closest('.icard [data-act]');
@@ -772,18 +882,24 @@ document.getElementById('view').addEventListener('click', e => {
 document.getElementById('modal').addEventListener('click', e => { if (e.target.id === 'modal') closeModal(); });
 document.getElementById('view').addEventListener('change', e => {
  if (e.target.id === 'fileup') {
-  const files = Array.from(e.target.files || []); e.target.value = '';
+  const files = Array.from(e.target.files || []);
+  const repoTarget = e.target.dataset.repo || '';
+  e.target.value = '';
   if (!files.length) return;
   if (!IVEDB.filesReady()) return toast('Connect Drive first (sidebar button)', true);
   let done = 0, fail = 0;
   toast('Uploading ' + files.length + ' file' + (files.length === 1 ? '' : 's') + ' to Drive…');
   (async () => {
    for (const f of files) {
-    try { await IVEDB.filesUpload(f, f.name, f.type || 'application/octet-stream'); done++; }
+    try {
+     if (repoTarget) await IVEDB.repoFileUpload(repoTarget, f, f.name, f.type || 'application/octet-stream');
+     else await IVEDB.filesUpload(f, f.name, f.type || 'application/octet-stream');
+     done++;
+    }
     catch (err) { fail++; toast('Upload failed: ' + f.name + ' — ' + err.message, true); }
    }
-   if (done) toast(done + ' file' + (done === 1 ? '' : 's') + ' uploaded to Drive ✓');
-   if (document.getElementById('filegrid')) render();
+   if (done) toast(done + ' file' + (done === 1 ? '' : 's') + ' pushed to Drive ✓');
+   if (document.getElementById('filegrid') || document.getElementById('filetable')) render();
   })();
   return;
  }

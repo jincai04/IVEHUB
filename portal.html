@@ -31,6 +31,12 @@
  .drivebtn .dot{width:7px;height:7px;border-radius:50%;background:#5b7189;flex:none}
  .drivebtn.on .dot{background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.8)}
  .drivemeta{color:#5b7189;font-size:.62rem;text-align:center;margin-top:6px}
+ .quotewrap{margin-top:8px;display:none}
+ .quotebar{height:5px;background:rgba(255,255,255,.08);border-radius:99px;overflow:hidden}
+ .quotefill{height:100%;border-radius:99px;width:0;transition:width .6s;background:linear-gradient(90deg,#22c55e,#4ade80)}
+ .quotefill.warn{background:linear-gradient(90deg,#f59e0b,#fbbf24)}
+ .quotefill.danger{background:linear-gradient(90deg,#ef4444,#f87171)}
+ .quotetext{color:#5b7189;font-size:.62rem;text-align:center;margin-top:5px}
  .main{position:relative;z-index:1;margin-left:236px;min-height:100vh;padding:112px 30px 60px;max-width:1200px}
  .btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;padding:8px 16px;border-radius:12px;font-size:.75rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-block}
  .btn:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#f87171}
@@ -170,6 +176,7 @@
  <div class="sidefoot">
   <button class="drivebtn" id="drivebtn"><span class="dot"></span><span id="drivelabel">☁ Connect Drive</span></button>
   <div class="drivemeta" id="drivemeta">local storage only</div>
+  <div class="quotewrap" id="quotewrap"><div class="quotebar"><div class="quotefill" id="quotefill"></div></div><div class="quotetext" id="quotetext"></div></div>
  </div>
 </aside>
 <header class="topheader"><img class="headerlogo" src="ivezone-header.png" alt="IVEZONE — Work · Manage · Grow"><a class="btn" href="index.html" onclick="sessionStorage.removeItem('ivehub_auth')">LOCK ⬦</a></header>
@@ -754,6 +761,7 @@ function render(){
  if (sec==='files') loadFiles(sub === 'photos' ? 'image' : 'all');
  if (sec==='code' && sub==='repos') loadRepos();
  if (sec==='code' && sub==='repo') loadRepo(route().param);
+ if (sec==='files' || sec==='code') loadQuota();
  if (sec==='home' && sub==='recent') { renderRecentChips(); const c = document.getElementById('clearh'); if (c) c.onclick = () => { try{localStorage.removeItem(HKEY);}catch(e){} renderRecentChips(); toast('History cleared'); }; }
  tick();
  document.getElementById('sidebar').classList.remove('open');
@@ -935,6 +943,20 @@ function driveUi(){
  document.getElementById('drivemeta').textContent = s.connected
   ? ('last sync ' + (s.lastSync ? new Date(s.lastSync).toLocaleTimeString('en-MY') : '…'))
   : (s.clientIdSet ? 'tap to sync via Google Drive' : 'local storage only — set google.clientId (README)');
+ if (!s.connected) { const w = document.getElementById('quotewrap'); if (w) w.style.display = 'none'; }
+}
+function loadQuota(){
+ if (!IVEDB.filesReady()) return;
+ IVEDB.storageQuota().then(q => {
+  const wrap = document.getElementById('quotewrap'); if (!wrap) return;
+  if (!q.limit) { wrap.style.display = 'none'; return; }
+  const pct = Math.min(100, Math.round(q.usage / q.limit * 100));
+  const fill = document.getElementById('quotefill');
+  fill.className = 'quotefill' + (pct >= 90 ? ' danger' : pct >= 70 ? ' warn' : '');
+  fill.style.width = pct + '%';
+  document.getElementById('quotetext').textContent = 'Drive: ' + fmtSize(q.usage) + ' / ' + fmtSize(q.limit) + ' (' + pct + '%)';
+  wrap.style.display = 'block';
+ }).catch(() => {});
 }
 document.getElementById('drivebtn').onclick = async () => {
  const s = IVEDB.status();
@@ -942,7 +964,7 @@ document.getElementById('drivebtn').onclick = async () => {
   if (confirm('Disconnect Google Drive? Data stays on this device (localStorage); Drive keeps its copy.')) { IVEDB.disconnect(); driveUi(); toast('Drive disconnected'); }
   return;
  }
- try { await IVEDB.connect(); driveUi(); toast('Google Drive connected ✓ — data now syncs'); }
+ try { await IVEDB.connect(); driveUi(); loadQuota(); toast('Google Drive connected ✓ — data now syncs'); }
  catch (err) { toast('Drive connect failed: ' + err.message, true); }
 };
 IVEDB.onChange(driveUi);
@@ -956,5 +978,5 @@ applySettings();
 driveUi();
 render();
 /* silent Drive reconnect: pulls newest ivehub-data.json on devices that already consented */
-IVEDB.tryAutoConnect().then(ok => { if (ok) { applySettings(); driveUi(); render(); } });
+IVEDB.tryAutoConnect().then(ok => { if (ok) { applySettings(); driveUi(); loadQuota(); render(); } });
 </script></body></html>

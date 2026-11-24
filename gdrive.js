@@ -293,9 +293,19 @@ window.IVEDB = (function () {
   function repoFileUpload(repoId, blob, name, mimeType) { return uploadTo(repoId, blob, name, mimeType); }
   function repoFileTrash(fileId) { return trashFile(fileId); }
 
+  // Drive storage quota (Drive usage vs account plan limit)
+  function storageQuota() {
+    return api('https://www.googleapis.com/drive/v3/about?fields=storageQuota')
+      .then(r => r.json())
+      .then(j => {
+        const q = j.storageQuota || {};
+        return { limit: q.limit ? +q.limit : null, usage: +(q.usageInDrive || q.usage || 0), trash: +(q.usageInDriveTrash || 0) };
+      });
+  }
+
   function onChange(fn) { listeners.push(fn); }
 
   init();
 
-  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace, filesReady, filesList, filesUpload, filesDelete, reposList, repoCreate, repoTrash, repoFiles, repoFileUpload, repoFileTrash };
+  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace, filesReady, filesList, filesUpload, filesDelete, reposList, repoCreate, repoTrash, repoFiles, repoFileUpload, repoFileTrash, storageQuota };
 })();

@@ -217,11 +217,10 @@ window.IVEDB = (function () {
     return { connected, fileId, clientIdSet: !!GOOGLE().clientId, lastSync };
   }
 
-  // ---------- Drive folders & files (uploads, photos, code repos) ----------
-  // Real files in the user's Drive: "IVEZONE Files" for uploads/photos,
-  // "IVEZONE Code" root with one subfolder per code repo.
+  // ---------- Drive folders & files (uploads, photos) ----------
+  // Real files in the user's Drive: "IVEZONE Files" for uploads/photos.
+  // Code repos now live on GitHub (github.js) — Drive only holds JSON data + files.
   const FILES_FOLDER = 'IVEZONE Files';
-  const CODE_ROOT = 'IVEZONE Code';
   const folderCache = {};
 
   function filesReady() { return connected && !!token; }
@@ -261,37 +260,11 @@ window.IVEDB = (function () {
       .then(r => r.json());
   }
 
-  function trashFile(id) {
-    return api('https://www.googleapis.com/drive/v3/files/' + id, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ trashed: true })
-    }).then(() => true);
-  }
-
   function filesList() { return ensureFolder(FILES_FOLDER).then(fid => listIn(fid, 'files(id,name,mimeType,size,thumbnailLink,createdTime)')); }
   function filesUpload(blob, name, mimeType) { return ensureFolder(FILES_FOLDER).then(fid => uploadTo(fid, blob, name, mimeType)); }
   function filesDelete(id) {
     return api('https://www.googleapis.com/drive/v3/files/' + id, { method: 'DELETE' }).then(() => true);
   }
-
-  // Code repos: one Drive subfolder per repo under "IVEZONE Code"
-  function reposList() {
-    return ensureFolder(CODE_ROOT).then(fid => listIn(fid, 'files(id,name,description,modifiedTime)'));
-  }
-
-  function repoCreate(name, desc) {
-    return ensureFolder(CODE_ROOT).then(fid => api('https://www.googleapis.com/drive/v3/files?fields=id,name,description', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ name: name, description: desc || '', mimeType: 'application/vnd.google-apps.folder', parents: [fid] })
-    }).then(r => r.json()));
-  }
-
-  function repoTrash(id) { return trashFile(id); }
-  function repoFiles(repoId) { return listIn(repoId, 'files(id,name,mimeType,size,modifiedTime)'); }
-  function repoFileUpload(repoId, blob, name, mimeType) { return uploadTo(repoId, blob, name, mimeType); }
-  function repoFileTrash(fileId) { return trashFile(fileId); }
 
   // Drive storage quota (Drive usage vs account plan limit)
   function storageQuota() {
@@ -307,5 +280,5 @@ window.IVEDB = (function () {
 
   init();
 
-  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace, filesReady, filesList, filesUpload, filesDelete, reposList, repoCreate, repoTrash, repoFiles, repoFileUpload, repoFileTrash, storageQuota };
+  return { data, save, connect, disconnect, tryAutoConnect, status, uid, onChange, replace, filesReady, filesList, filesUpload, filesDelete, storageQuota };
 })();

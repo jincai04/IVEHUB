@@ -7,13 +7,14 @@ Data syncs through the user's own Google Drive (optional — works without it us
 - `index.html` — animated login page (credentials in `config.js` → `creds`)
 - `portal.html` — the portal app (sidebar SPA, hash routing, works on Netlify)
 - `gdrive.js` — data layer: Google Drive sync + localStorage fallback (one file, `ivehub-data.json`)
+- `github.js` — GitHub REST API layer for the Code tab (real repos, PAT auth)
 - `config.js` — credentials, Token API URL, Google Client ID, and the seed app lists
 - `ivehub-server.mjs` — IVE Token API (its built-in legacy portal page is no longer the main frontend)
 
 ## Sections
 - **Home** — My Dashboard (token usage + favorites + recent), Quick Access, Recently Used, Today
 - **Files** — My Files / Photos — uploads go to an "IVEZONE Files" folder in your Google Drive (needs Drive connected), so the same files show on every device. Opens/downloads via drive.google.com links.
-- **Code** — Repositories — GitHub-style code repos; each repo is a subfolder of the "IVEZONE Code" Drive folder. Push = upload via the portal or drop files into the folder from any Drive app. Pull = per-file download links or download the folder as ZIP from Drive. Deleting a repo/file moves it to Drive trash (30-day recovery).
+- **Code** — Repositories — **real GitHub repos** on your own account. Creating a repo here instantly creates it on GitHub; uploading files pushes real commits; deleting files/repos commits/deletes on GitHub. Each repo page shows the **GIT URL** (`https://github.com/<you>/<repo>.git`) with a clone/pull/push cheat sheet, folder browsing, per-file download via GitHub, and Download ZIP. Storage is GitHub's (free), not your Drive.
 - **Applications** — Business Apps / Databases (seeded from the old MGM, Lunar, MODU & Database hubs), Personal, Development, Favorites (★ any app)
 - **Projects / My Brain** — Phase 2 (structure visible in the sidebar)
 - **My Tech / My Life / Settings** — Phase 3
@@ -34,6 +35,18 @@ Data syncs through the user's own Google Drive (optional — works without it us
 Notes:
 - The app only requests the `drive.file` scope — it can only see/edit files it created itself.
 - Until you connect (or if offline), everything is stored in the browser's localStorage and works normally; connecting uploads the newest copy.
+
+## GitHub token (for the Code tab, one-time ~2 min)
+1. Go to https://github.com/settings/tokens → **Generate new token → Generate new token (classic)**.
+2. Note (e.g. `IVEZONE`), tick scopes: **repo** (required) and **delete_repo** (only needed if you want to delete repos from the portal).
+3. Generate, copy the token, open IVEZONE → **Code → Repositories**, paste it into the connect card (or the ⚙ TOKEN button) → CONNECT.
+
+Notes:
+- Repos are created on **your GitHub account**, private by default (choose Public in the new-repo form).
+- The token is stored in your IVEZONE settings and syncs to your other devices through your own Drive — it is plaintext inside your private data file, which is fine for personal use on your own account.
+- Uploading in the portal = one git commit per file ("Add <name> via IVEZONE"); big files should still go through normal `git push` (Contents API is best under ~50 MB per file).
+- Deleting a repo needs `delete_repo`; without it the portal will tell you which scope to add.
+- Old Drive-based repos ("IVEZONE Code" folder) were not migrated — delete that folder in Drive manually if you want the space back.
 
 ## Token API
 `portal.html` reads usage from the IVE Token API (`tokenApi` in config.js).

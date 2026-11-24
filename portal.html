@@ -2,6 +2,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="config.js"></script>
 <script src="gdrive.js"></script>
+<script src="github.js"></script>
 <style>
  *{box-sizing:border-box}
  :root{--acc:#38bdf8;--accbg:rgba(56,189,248,.12);--accbrd:rgba(56,189,248,.4)}
@@ -214,7 +215,7 @@ function buildNav(){
 function route(){
  const h = location.hash.replace(/^#\/?/, '') || 'home/dashboard';
  const parts = h.split('/');
- return {sec: parts[0], sub: parts[1] || '', param: parts[2] || ''};
+ return {sec: parts[0], sub: parts[1] || '', param: parts[2] || '', rest: decodeURIComponent(parts.slice(3).join('/'))};
 }
 
 /* ---------------- helpers ---------------- */
@@ -299,28 +300,61 @@ function loadFiles(mode){
  });
 }
 
-/* ---------------- code repos ---------------- */
+/* ---------------- code repos (real GitHub) ---------------- */
+function ghOwner(){ return IVEGH.settings().user || ''; }
+function ghFileIcon(name){
+ const e = (name.split('.').pop() || '').toLowerCase();
+ if (['html','htm'].indexOf(e)>=0) return '🌐';
+ if (['css','scss','less'].indexOf(e)>=0) return '🎨';
+ if (['js','mjs','cjs','ts','jsx','tsx','json'].indexOf(e)>=0) return '🟨';
+ if (['py'].indexOf(e)>=0) return '🐍';
+ if (['java','kt','gradle'].indexOf(e)>=0) return '☕';
+ if (['php'].indexOf(e)>=0) return '🐘';
+ if (['c','h','cpp','hpp','cs','sln'].indexOf(e)>=0) return '🔷';
+ if (['go'].indexOf(e)>=0) return '🐹';
+ if (['rs'].indexOf(e)>=0) return '🦀';
+ if (['sh','bash','bat','ps1'].indexOf(e)>=0) return '📜';
+ if (['yml','yaml','toml','ini','cfg','env','lock'].indexOf(e)>=0) return '🔧';
+ if (['md','txt','rst','log','xml'].indexOf(e)>=0) return '📝';
+ if (['png','jpg','jpeg','gif','svg','webp','ico','bmp'].indexOf(e)>=0) return '🖼️';
+ if (['zip','tar','gz','rar','7z','jar'].indexOf(e)>=0) return '🗜️';
+ return '📄';
+}
+function ghConnectCard(){
+ return `<div class="glass card" style="max-width:600px;margin:6px auto 0;text-align:center;padding:36px 32px">
+  <div style="font-size:2.4rem">🐙</div>
+  <h3 style="margin:10px 0 8px">Connect your GitHub</h3>
+  <div style="color:#8aa0b8;font-size:.9rem;line-height:1.6">Paste a GitHub Personal Access Token — repos created here are <b>real GitHub repos</b> on your account, so <code>git clone / pull / push</code> works from any machine.</div>
+  <div style="display:flex;gap:10px;margin-top:20px">
+   <input class="search" id="ghtokinput" type="password" placeholder="Paste token (ghp_… or github_pat_…)" style="flex:1;text-align:left;margin:0">
+   <button class="addbtn" data-ghconnect="1">🔗 CONNECT</button>
+  </div>
+  <div class="icard-meta" style="margin-top:18px;text-align:left;line-height:1.8">Setup (once): GitHub → Settings → Developer settings → Personal access tokens → <b>Tokens (classic)</b> → Generate new token → tick <b>repo</b> and <b>delete_repo</b> → copy the token here.<br><a href="https://github.com/settings/tokens" target="_blank" rel="noopener" style="color:var(--acc)">Open github.com/settings/tokens ↗</a><br>The token is saved in your IVEZONE settings and syncs to your other devices via your own Drive.</div>
+ </div>`;
+}
 function repoCard(r){
- return `<div class="glass icard" data-repoid="${esc(r.id)}">
-  <div class="icard-head"><a class="nm" style="cursor:pointer;text-decoration:none" href="#/code/repo/${esc(r.id)}">📁 ${esc(r.name)}</a></div>
+ const own = ghOwner();
+ return `<div class="glass icard" data-reponame="${esc(r.name)}">
+  <div class="icard-head"><a class="nm" style="cursor:pointer;text-decoration:none" href="#/code/repo/${esc(r.name)}">📁 ${esc(r.name)}</a><span class="planchip" style="margin-left:auto">${r.private ? '🔒 private' : '🌐 public'}</span></div>
   ${r.description ? `<div class="bodyprev">${esc(r.description)}</div>` : ''}
-  <div class="icard-meta">updated ${r.modifiedTime ? new Date(r.modifiedTime).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'}) : '?'}</div>
+  <div class="icard-meta">updated ${r.updated_at ? new Date(r.updated_at).toLocaleDateString('en-MY',{day:'numeric',month:'short',year:'numeric'}) : '?'}</div>
   <div class="acts2">
-   <a class="abtn" style="text-decoration:none" href="#/code/repo/${esc(r.id)}">open</a>
+   <a class="abtn" style="text-decoration:none" href="#/code/repo/${esc(r.name)}">open</a>
    <span style="flex:1"></span>
-   <a class="abtn" style="text-decoration:none" href="https://drive.google.com/drive/folders/${esc(r.id)}" target="_blank" rel="noopener" title="Open folder in Drive">↗ drive</a>
-   <button class="abtn del" data-repotrash="${esc(r.id)}" title="Delete repo">🗑</button>
+   <a class="abtn" style="text-decoration:none" href="${esc(IVEGH.repoUrl(own, r.name))}" target="_blank" rel="noopener" title="Open on GitHub">↗ github</a>
+   <button class="abtn" data-ghcopy="${esc(r.name)}" title="Copy git clone URL">⧉</button>
+   <button class="abtn del" data-repotrash="${esc(r.name)}" title="Delete repo on GitHub">🗑</button>
   </div></div>`;
 }
 function loadRepos(){
  const grid = document.getElementById('repogrid'); if (!grid) return;
- if (!IVEDB.filesReady()) {
-  grid.innerHTML = '<div class="empty" style="grid-column:1/-1">☁ Connect Drive (sidebar) to use Code repos — they sync across all your devices.</div>';
-  const st = document.getElementById('repostat'); if (st) st.textContent = 'Drive not connected';
+ if (!IVEGH.ready()) {
+  grid.innerHTML = '<div style="grid-column:1/-1">' + ghConnectCard() + '</div>';
+  const st = document.getElementById('repostat'); if (st) st.textContent = 'GitHub not connected';
   return;
  }
- IVEDB.reposList().then(repos => {
-  const st2 = document.getElementById('repostat'); if (st2) st2.textContent = repos.length + ' repo' + (repos.length === 1 ? '' : 's');
+ IVEGH.repos().then(repos => {
+  const st2 = document.getElementById('repostat'); if (st2) st2.textContent = repos.length + ' repo' + (repos.length === 1 ? '' : 's') + ' on GitHub';
   if (!repos.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">No repositories yet — click ＋ NEW REPO to create your first one.</div>'; return; }
   grid.innerHTML = repos.map(repoCard).join('');
  }).catch(e => {
@@ -328,29 +362,49 @@ function loadRepos(){
   const st3 = document.getElementById('repostat'); if (st3) st3.textContent = '';
  });
 }
-function fileRow(f){
- return `<div class="glass frow" data-fileid="${esc(f.id)}">
-  <span class="ico">${fileIcon(f.mimeType)}</span>
-  <a class="fname" href="https://drive.google.com/file/d/${esc(f.id)}/view" target="_blank" rel="noopener" title="Open / download">${esc(f.name)}</a>
-  <span class="fmeta">${fmtSize(f.size)} · ${f.modifiedTime ? new Date(f.modifiedTime).toLocaleString('en-MY',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : ''}</span>
-  <button class="abtn del" data-codefdel="${esc(f.id)}" title="Delete file">🗑</button>
+function ghFileRow(f, repo, path){
+ const p = path ? path + '/' + f.name : f.name;
+ if (f.type === 'dir') {
+  return `<div class="glass frow">
+   <span class="ico">📁</span>
+   <a class="fname" style="cursor:pointer" href="#/code/repo/${encodeURIComponent(repo)}/${p.split('/').map(encodeURIComponent).join('/')}" title="Open folder">${esc(f.name)}</a>
+   <span class="fmeta">folder</span>
+   <span class="fmeta"></span>
+  </div>`;
+ }
+ return `<div class="glass frow">
+  <span class="ico">${ghFileIcon(f.name)}</span>
+  <a class="fname" href="${esc(f.html_url || IVEGH.blobUrl(ghOwner(), repo, p))}" target="_blank" rel="noopener" title="Open on GitHub">${esc(f.name)}</a>
+  <span class="fmeta">${fmtSize(f.size)}</span>
+  <button class="abtn del" data-codefdel="${esc(p)}" title="Delete file (git commit)">🗑</button>
  </div>`;
 }
-function loadRepo(fid){
- if (!IVEDB.filesReady()) {
+function loadRepo(name){
+ const path = route().rest || '';
+ if (!IVEGH.ready()) {
   const t = document.getElementById('filetable');
-  if (t) t.innerHTML = '<div class="empty">☁ Connect Drive (sidebar) to view and upload files.</div>';
+  if (t) t.innerHTML = ghConnectCard();
   return;
  }
- IVEDB.reposList().then(repos => {
-  const r = repos.find(x => x.id === fid);
-  const ti = document.getElementById('repotitle'); if (ti && r) ti.textContent = '📁 ' + r.name;
-  const de = document.getElementById('repodesc'); if (de) de.textContent = r && r.description ? r.description : 'Code files stored in your Google Drive';
- }).catch(() => {});
- IVEDB.repoFiles(fid).then(files => {
+ const own = ghOwner();
+ const bc = document.getElementById('repobc');
+ if (bc) {
+  const segs = path.split('/').filter(Boolean);
+  let crumb = `<a href="#/code/repo/${encodeURIComponent(name)}" style="color:var(--acc);text-decoration:none">${esc(name)}</a>`;
+  segs.forEach((seg, i) => {
+   crumb += ' / ' + (i === segs.length-1 ? esc(seg) : `<a href="#/code/repo/${encodeURIComponent(name)}/${segs.slice(0,i+1).map(encodeURIComponent).join('/')}" style="color:var(--acc);text-decoration:none">${esc(seg)}</a>`);
+  });
+  bc.innerHTML = crumb;
+ }
+ const up = document.getElementById('fileup');
+ if (up) { up.dataset.repo = name; up.dataset.path = path; }
+ IVEGH.contents(own, name, path).then(files => {
+  const ti = document.getElementById('repotitle'); if (ti) ti.textContent = '📁 ' + name;
   const t = document.getElementById('filetable'); if (!t) return;
-  if (!files.length) { t.innerHTML = '<div class="empty">Repository is empty — click ⬆ UPLOAD FILES to push code, or add files to the Drive folder from any device.</div>'; return; }
-  t.innerHTML = '<div class="filetable">' + files.map(fileRow).join('') + '</div>';
+  const dirs = files.filter(f => f.type === 'dir'), fs = files.filter(f => f.type !== 'dir');
+  const rows = dirs.concat(fs).map(f => ghFileRow(f, name, path)).join('');
+  if (!rows) { t.innerHTML = '<div class="empty">Repository is empty — click ⬆ UPLOAD FILES to make the first commit.</div>'; return; }
+  t.innerHTML = '<div class="filetable">' + rows + '</div>';
  }).catch(e => {
   const t = document.getElementById('filetable');
   if (t) t.innerHTML = `<div class="empty">⚠ Could not list files — ${esc(e.message)}</div>`;
@@ -394,17 +448,26 @@ const VIEWS = {
  'files/myfiles'(){ return filesView('all'); },
  'files/photos'(){ return filesView('image'); },
  'code/repos'(){
-  return `<div class="ph"><h1>Repositories</h1><div class="sub">GitHub-style code repos — each one is a folder in your Google Drive ("IVEZONE Code"), same on every device</div></div>
-  <div class="tools"><button class="addbtn" data-newrepo="1">＋ NEW REPO</button><span class="icard-meta" id="repostat"></span></div>
+  const own = ghOwner();
+  return `<div class="ph"><h1>Repositories</h1><div class="sub">${own ? 'Real GitHub repos on <b>' + esc(own) + '</b> — upload here = commits, and git clone/pull/push works from any machine' : 'Real GitHub repos on your own account — upload here = commits, clone &amp; push from anywhere'}</div></div>
+  <div class="tools"><button class="addbtn" data-newrepo="1">＋ NEW REPO</button><span class="icard-meta" id="repostat"></span><button class="abtn" data-ghtoken="1" title="Replace the GitHub token">⚙ TOKEN</button></div>
   <div class="grid" id="repogrid"><div class="empty" style="grid-column:1/-1">loading…</div></div>`;
  },
  'code/repo'(){
-  const fid = route().param;
-  return `<div class="ph"><h1 id="repotitle">Repository</h1><div class="sub" id="repodesc">loading…</div></div>
-  <div class="tools"><label class="addbtn" style="cursor:pointer">⬆ UPLOAD FILES<input type="file" id="fileup" data-repo="${esc(fid)}" multiple style="display:none"></label>
-  <a class="btn" href="https://drive.google.com/drive/folders/${esc(fid)}" target="_blank" rel="noopener">OPEN IN DRIVE ↗</a>
-  <button class="btn" data-repotrash="${esc(fid)}" data-back="1">🗑 DELETE REPO</button>
+  const name = route().param;
+  const own = ghOwner();
+  const git = IVEGH.cloneUrl(own, name);
+  return `<div class="ph"><h1 id="repotitle">📁 ${esc(name)}</h1><div class="sub" id="repobc">${esc(name)}</div></div>
+  <div class="tools"><label class="addbtn" style="cursor:pointer">⬆ UPLOAD FILES<input type="file" id="fileup" data-repo="${esc(name)}" multiple style="display:none"></label>
+  <button class="btn" data-ghzip="1">⬇ DOWNLOAD ZIP</button>
+  <a class="btn" href="${esc(IVEGH.repoUrl(own, name))}" target="_blank" rel="noopener">OPEN ON GITHUB ↗</a>
+  <button class="btn" data-repotrash="${esc(name)}" data-back="1">🗑 DELETE REPO</button>
   <a class="btn" href="#/code/repos">← ALL REPOS</a></div>
+  <div class="glass card" style="padding:16px 18px;margin:0 0 16px">
+   <div class="label" style="margin-bottom:8px">GIT URL <button class="abtn" data-ghcopy="${esc(name)}" title="Copy git clone URL">⧉ COPY</button></div>
+   <code style="display:block;user-select:all;background:#0a1220;border:1px solid rgba(255,255,255,.08);border-radius:8px;padding:10px 12px;font-size:.85rem;overflow-x:auto;white-space:nowrap">${esc(git)}</code>
+   <div class="icard-meta" style="margin-top:10px;line-height:1.9">git clone ${esc(git)}<br>git pull &nbsp;·&nbsp; git add . &amp;&amp; git commit -m "msg" &amp;&amp; git push</div>
+  </div>
   <div id="filetable"><div class="empty">loading…</div></div>`;
  },
  'projects/active'(){
@@ -654,6 +717,8 @@ function openForm(head, fields, values, onSave, onDelete){
  const mb = document.getElementById('modalbody');
  mb.innerHTML = `<h3>${esc(head)}</h3>` + fields.map(f => `<div class="field"><label>${esc(f.label)}</label>` + (f.type==='textarea'
    ? `<textarea id="ff-${f.k}" rows="5" placeholder="${esc(f.ph||'')}">${esc(values[f.k]||'')}</textarea>`
+   : f.type==='select'
+   ? `<select id="ff-${f.k}">${(f.opts||[]).map(o => `<option value="${esc(o.v)}"${(values[f.k]||f.def)===o.v?' selected':''}>${esc(o.l)}</option>`).join('')}</select>`
    : `<input id="ff-${f.k}" type="${f.type||'text'}" value="${esc(values[f.k]==null?'':values[f.k])}" placeholder="${esc(f.ph||'')}">`) + `</div>`).join('')
   + `<div class="macts">${onDelete?'<button class="mbtn danger" id="m-del">DELETE</button>':''}<button class="mbtn" id="m-cancel">CANCEL</button><button class="mbtn primary" id="m-save">SAVE</button></div>`;
  document.getElementById('modal').classList.add('open');
@@ -761,7 +826,7 @@ function render(){
  if (sec==='files') loadFiles(sub === 'photos' ? 'image' : 'all');
  if (sec==='code' && sub==='repos') loadRepos();
  if (sec==='code' && sub==='repo') loadRepo(route().param);
- if (sec==='files' || sec==='code') loadQuota();
+ if (sec==='files') loadQuota();
  if (sec==='home' && sub==='recent') { renderRecentChips(); const c = document.getElementById('clearh'); if (c) c.onclick = () => { try{localStorage.removeItem(HKEY);}catch(e){} renderRecentChips(); toast('History cleared'); }; }
  tick();
  document.getElementById('sidebar').classList.remove('open');
@@ -807,32 +872,85 @@ document.getElementById('view').addEventListener('click', e => {
  }
  const nrep = e.target.closest('[data-newrepo]');
  if (nrep) {
-  if (!IVEDB.filesReady()) return toast('Connect Drive first (sidebar button)', true);
-  IVEDB.reposList().then(repos => openForm('New Repository',
-   [{k:'name',label:'Repository name',ph:'my-project'},{k:'desc',label:'Description (optional)',ph:'What this code is for'}],
+  if (!IVEGH.ready()) return toast('Connect GitHub first — paste your token below', true);
+  openForm('New GitHub Repository',
+   [{k:'name',label:'Repository name',ph:'my-project'},{k:'desc',label:'Description (optional)',ph:'What this code is for'},{k:'vis',label:'Visibility',type:'select',def:'private',opts:[{v:'private',l:'🔒 Private (only you)'},{v:'public',l:'🌐 Public'}]}],
    {},
    vals => {
-    const name = vals.name.trim();
+    const name = vals.name.trim().replace(/\s+/g,'-');
     if (!name) { toast('Give the repo a name', true); return false; }
-    if (repos.some(r => r.name.toLowerCase() === name.toLowerCase())) { toast('A repo with that name already exists', true); return false; }
-    IVEDB.repoCreate(name, vals.desc.trim()).then(() => { toast('Repository created ✓'); render(); }).catch(err => toast('Create failed: ' + err.message, true));
-   }));
+    if (!/^[A-Za-z0-9._-]+$/.test(name)) { toast('Repo names: letters, numbers, dots, dashes, underscores only', true); return false; }
+    IVEGH.createRepo(name, vals.desc.trim(), vals.vis !== 'public').then(() => { toast('Repository created on GitHub ✓'); render(); }).catch(err => toast('Create failed: ' + err.message, true));
+   });
   return;
  }
  const rtr = e.target.closest('[data-repotrash]');
  if (rtr) {
-  const rid = rtr.dataset.repotrash;
-  if (!confirm('Delete this repository? Everything in it stays recoverable in your Drive trash for 30 days.')) return;
-  IVEDB.repoTrash(rid).then(() => {
+  const name = rtr.dataset.repotrash;
+  if (!confirm('Delete repository "' + name + '" on GitHub? This is permanent — GitHub keeps no trash. Make sure you have a copy/mirror if you need the code.')) return;
+  IVEGH.deleteRepo(ghOwner(), name).then(() => {
    if (rtr.dataset.back) { location.hash = '#/code/repos'; } else { render(); }
-   toast('Repository moved to Drive trash');
-  }).catch(err => toast('Delete failed: ' + err.message, true));
+   toast('Repository deleted on GitHub');
+  }).catch(err => {
+   if (err.status === 403) toast('Your token lacks the delete_repo scope — edit it at github.com/settings/tokens and tick delete_repo', true);
+   else toast('Delete failed: ' + err.message, true);
+  });
   return;
  }
  const cfd = e.target.closest('[data-codefdel]');
  if (cfd) {
-  if (!confirm('Move this file to Drive trash?')) return;
-  IVEDB.repoFileTrash(cfd.dataset.codefdel).then(() => { render(); toast('File moved to trash'); }).catch(err => toast('Delete failed: ' + err.message, true));
+  const repo = route().param, p = cfd.dataset.codefdel;
+  if (!confirm('Delete ' + p + ' with a git commit?')) return;
+  IVEGH.contents(ghOwner(), repo, p).then(list => {
+   const meta = Array.isArray(list) ? list[0] : list;
+   return IVEGH.deleteFile(ghOwner(), repo, p, meta.sha);
+  }).then(() => { render(); toast('File deleted — commit pushed ✓'); }).catch(err => toast('Delete failed: ' + err.message, true));
+  return;
+ }
+ const ght = e.target.closest('[data-ghtoken]');
+ if (ght) {
+  openForm('GitHub Token',
+   [{k:'token',label:'Personal Access Token',type:'password',ph:'ghp_…'}],
+   {},
+   vals => {
+    const t = vals.token.trim(); if (!t) { toast('Paste a token', true); return false; }
+    const prev = IVEGH.settings();
+    IVEGH.saveSettings({token: t, user: prev.user || ''});
+    IVEGH.user().then(u => {
+     IVEGH.saveSettings({token: t, user: u.login});
+     toast('GitHub connected — ' + u.login + ' ✓'); render();
+    }).catch(err => {
+     IVEGH.saveSettings(prev);
+     toast('Token rejected: ' + err.message, true); render();
+    });
+   });
+  return;
+ }
+ const ghc = e.target.closest('[data-ghconnect]');
+ if (ghc) {
+  const inp = document.getElementById('ghtokinput');
+  const t = inp ? inp.value.trim() : '';
+  if (!t) return toast('Paste your token first', true);
+  ghc.textContent = '…';
+  IVEGH.user().then(u => {
+   IVEGH.saveSettings({token: t, user: u.login});
+   toast('GitHub connected — ' + u.login + ' ✓');
+   render();
+  }).catch(err => { toast('Token rejected: ' + err.message, true); render(); });
+  return;
+ }
+ const ghcp = e.target.closest('[data-ghcopy]');
+ if (ghcp) {
+  const url = IVEGH.cloneUrl(ghOwner(), ghcp.dataset.ghcopy);
+  const done = () => toast('Git URL copied ✓');
+  if (navigator.clipboard && navigator.clipboard.writeText) navigator.clipboard.writeText(url).then(done).catch(() => prompt('Copy this Git URL:', url));
+  else prompt('Copy this Git URL:', url);
+  return;
+ }
+ const ghz = e.target.closest('[data-ghzip]');
+ if (ghz) {
+  toast('Downloading ZIP…');
+  IVEGH.downloadZip(ghOwner(), route().param).then(() => toast('ZIP downloaded ✓')).catch(err => toast('Download failed: ' + err.message, true));
   return;
  }
  const iact = e.target.closest('.icard [data-act]');
@@ -892,22 +1010,38 @@ document.getElementById('view').addEventListener('change', e => {
  if (e.target.id === 'fileup') {
   const files = Array.from(e.target.files || []);
   const repoTarget = e.target.dataset.repo || '';
+  const upPath = e.target.dataset.path || '';
   e.target.value = '';
   if (!files.length) return;
+  if (repoTarget) {
+   if (!IVEGH.ready()) return toast('Connect GitHub first', true);
+   const own = ghOwner();
+   let done = 0;
+   toast('Committing ' + files.length + ' file' + (files.length === 1 ? '' : 's') + ' to GitHub…');
+   (async () => {
+    for (const f of files) {
+     try {
+      const p = upPath ? upPath + '/' + f.name : f.name;
+      await IVEGH.putFile(own, repoTarget, p, f, 'Add ' + p + ' via IVEZONE');
+      done++;
+     }
+     catch (err) { toast('Commit failed: ' + f.name + ' — ' + err.message, true); }
+    }
+    if (done) toast(done + ' file' + (done === 1 ? '' : 's') + ' committed ✓');
+    if (document.getElementById('filetable')) render();
+   })();
+   return;
+  }
   if (!IVEDB.filesReady()) return toast('Connect Drive first (sidebar button)', true);
-  let done = 0, fail = 0;
+  let done = 0;
   toast('Uploading ' + files.length + ' file' + (files.length === 1 ? '' : 's') + ' to Drive…');
   (async () => {
    for (const f of files) {
-    try {
-     if (repoTarget) await IVEDB.repoFileUpload(repoTarget, f, f.name, f.type || 'application/octet-stream');
-     else await IVEDB.filesUpload(f, f.name, f.type || 'application/octet-stream');
-     done++;
-    }
-    catch (err) { fail++; toast('Upload failed: ' + f.name + ' — ' + err.message, true); }
+    try { await IVEDB.filesUpload(f, f.name, f.type || 'application/octet-stream'); done++; }
+    catch (err) { toast('Upload failed: ' + f.name + ' — ' + err.message, true); }
    }
    if (done) toast(done + ' file' + (done === 1 ? '' : 's') + ' pushed to Drive ✓');
-   if (document.getElementById('filegrid') || document.getElementById('filetable')) render();
+   if (document.getElementById('filegrid')) render();
   })();
   return;
  }

@@ -15,9 +15,9 @@
  .glass{background:linear-gradient(145deg,rgba(255,255,255,.07),rgba(255,255,255,.02));backdrop-filter:blur(14px);border:1px solid rgba(255,255,255,.09);border-radius:16px}
  /* ---------- layout ---------- */
  .sidebar{position:fixed;top:0;left:0;bottom:0;width:236px;z-index:20;display:flex;flex-direction:column;background:linear-gradient(180deg,rgba(10,16,30,.92),rgba(7,11,20,.96));backdrop-filter:blur(18px);border-right:1px solid rgba(255,255,255,.08);transition:transform .3s cubic-bezier(.22,1,.36,1)}
- .brandrow{padding:16px 16px 12px}
- .brandbanner{width:100%;display:block;border-radius:12px}
- .nav{flex:1;overflow-y:auto;padding:4px 10px 12px}
+ .topheader{position:fixed;top:0;left:236px;right:0;z-index:15;height:84px;display:flex;align-items:center;justify-content:space-between;gap:18px;padding:0 26px;background:linear-gradient(180deg,rgba(10,16,30,.88),rgba(10,16,30,.72));backdrop-filter:blur(16px);border-bottom:1px solid rgba(255,255,255,.08)}
+ .headerlogo{height:62px;width:auto;display:block;flex:none}
+ .nav{flex:1;overflow-y:auto;padding:14px 10px 12px}
  .nav::-webkit-scrollbar{width:4px}.nav::-webkit-scrollbar-thumb{background:rgba(125,211,252,.25);border-radius:4px}
  .navsec{margin-top:12px}
  .navsec>a{display:flex;align-items:center;gap:9px;padding:7px 10px;border-radius:10px;color:#c7d4e4;font-weight:700;font-size:.78rem;letter-spacing:1.5px;text-transform:uppercase;text-decoration:none}
@@ -31,8 +31,7 @@
  .drivebtn .dot{width:7px;height:7px;border-radius:50%;background:#5b7189;flex:none}
  .drivebtn.on .dot{background:#4ade80;box-shadow:0 0 8px rgba(74,222,128,.8)}
  .drivemeta{color:#5b7189;font-size:.62rem;text-align:center;margin-top:6px}
- .main{position:relative;z-index:1;margin-left:236px;min-height:100vh;padding:26px 30px 60px;max-width:1200px}
- .topbar{position:fixed;top:16px;right:22px;z-index:15;display:flex;gap:10px}
+ .main{position:relative;z-index:1;margin-left:236px;min-height:100vh;padding:112px 30px 60px;max-width:1200px}
  .btn{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;padding:8px 16px;border-radius:12px;font-size:.75rem;letter-spacing:1px;cursor:pointer;text-decoration:none;transition:all .25s;display:inline-block}
  .btn:hover{background:rgba(248,113,113,.14);border-color:rgba(248,113,113,.4);color:#f87171}
  .burger{display:none;position:fixed;top:14px;left:14px;z-index:30;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);color:#c7d4e4;width:40px;height:40px;border-radius:12px;font-size:1rem;cursor:pointer}
@@ -86,7 +85,9 @@
  .tgl.on{background:var(--accbg);border-color:var(--accbrd)}
  .tgl.on span{left:23px;background:var(--acc)}
  .field input[type=date]{color-scheme:dark}
- body.compact .main{padding:16px 18px 40px}
+ body.compact .main{padding:112px 18px 40px}
+ body.compact .topheader{height:68px}
+ body.compact .headerlogo{height:48px}
  body.compact .ph h1{font-size:1.15rem}
  body.compact .acard,body.compact .icard{padding:10px 12px}
  body.compact .grid{gap:9px}
@@ -149,7 +150,9 @@
   .sidebar{transform:translateX(-105%)}
   .sidebar.open{transform:none;box-shadow:30px 0 80px rgba(2,8,23,.8)}
   .scrim.show{display:block}
-  .main{margin-left:0;padding:70px 16px 50px}
+  .topheader{left:0;height:64px;padding:0 16px 0 62px}
+  .headerlogo{height:42px}
+  .main{margin-left:0;padding:80px 16px 50px}
   .burger{display:block}
  }
 </style></head><body>
@@ -157,14 +160,13 @@
 <button class="burger" id="burger">☰</button>
 <div class="scrim" id="scrim"></div>
 <aside class="sidebar" id="sidebar">
- <div class="brandrow"><img class="brandbanner" src="ivezone-banner.png" alt="IVEZONE — Work · Manage · Grow"></div>
  <nav class="nav" id="nav"></nav>
  <div class="sidefoot">
   <button class="drivebtn" id="drivebtn"><span class="dot"></span><span id="drivelabel">☁ Connect Drive</span></button>
   <div class="drivemeta" id="drivemeta">local storage only</div>
  </div>
 </aside>
-<div class="topbar"><a class="btn" href="index.html" onclick="sessionStorage.removeItem('ivehub_auth')">LOCK ⬦</a></div>
+<header class="topheader"><img class="headerlogo" src="ivezone-header.png" alt="IVEZONE — Work · Manage · Grow"><a class="btn" href="index.html" onclick="sessionStorage.removeItem('ivehub_auth')">LOCK ⬦</a></header>
 <main class="main"><div id="view"></div></main>
 <div class="overlay" id="modal"><div class="glass panel" id="modalbody"></div></div>
 <div class="toast" id="toast"></div>

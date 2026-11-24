@@ -1,4 +1,4 @@
-// IVEHUB data layer — Google Drive (drive.file scope) with localStorage fallback.
+// IVEZONE data layer — Google Drive (drive.file scope) with localStorage fallback.
 // Single JSON file "ivehub-data.json" in the user's own Drive.
 // Usage:
 //   IVEDB.data()            -> current data object (mutate, then call save)
@@ -14,7 +14,7 @@ window.IVEDB = (function () {
   const LS_OPTOUT = 'ivehub_drive_optout';
   const DRIVE_FILENAME = 'ivehub-data.json';
   const SCOPE = 'https://www.googleapis.com/auth/drive.file';
-  const CFG = () => window.IVEHUB_CONFIG || {};
+  const CFG = () => window.IVEZONE_CONFIG || {};
   const GOOGLE = () => (CFG().google || {});
 
   let state = null;

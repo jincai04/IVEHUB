@@ -1,5 +1,5 @@
-// IVEHUB static config — edit values here
-window.IVEHUB_CONFIG = {
+// IVEZONE static config — edit values here
+window.IVEZONE_CONFIG = {
   // login (change these before going public)
   creds: { user: 'jincai04', pass: 'Kin@g123' },
   // IVE Token API (the local backend that checks OpenClaw usage)

@@ -1,4 +1,4 @@
-// IVEHUB portal + z.ai token monitor â€” http://localhost:3007
+// IVEZONE portal + z.ai token monitor â€” http://localhost:3007
 // Login-gated. Password via ENV IVE_PASS (default set below). Session cookie after login.
 import { DatabaseSync } from 'node:sqlite';
 import http from 'node:http';
@@ -103,7 +103,7 @@ const moduCards = MODU_APPS.map(([name, url, icon, desc]) =>
    </a>`
 ).join('\n');
 
-const LOGIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHUB Â· Sign in</title>
+const LOGIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEZONE Â· Sign in</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
  *{box-sizing:border-box;margin:0;padding:0}
@@ -143,8 +143,8 @@ const LOGIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEH
 <div class="bg"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
 <div class="grid"></div>
 <form class="card" id="f" method="post" action="/login">
- <div class="logo-wrap"><div class="ring"></div><div class="logo"><img src="/logo.png" alt="IVEHUB" style="width:100%;height:100%;object-fit:cover;border-radius:20px"></div></div>
- <h1>IVEHUB</h1>
+ <div class="logo-wrap"><div class="ring"></div><div class="logo"><img src="/logo.png" alt="IVEZONE" style="width:100%;height:100%;object-fit:cover;border-radius:20px"></div></div>
+ <h1>IVEZONE</h1>
  <div class="sub">Operations Control Portal</div>
  <div class="field"><input type="text" name="user" placeholder="Username" autocomplete="username" style="letter-spacing:2px"></div>
  <div class="field"><input type="password" name="pass" placeholder="Password" autofocus autocomplete="current-password"></div>
@@ -158,7 +158,7 @@ if (q.get('e') === '1') { document.getElementById('err').textContent = 'Access c
 </script>
 </body></html>`;
 
-const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHUB</title>
+const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEZONE</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
  *{box-sizing:border-box}
@@ -295,7 +295,7 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
 
 <div class="splash" id="splash">
  <div class="s-inner">
-  <div class="s-logo-wrap"><div class="s-ring"></div><div class="s-logo"><img src="/logo.png" alt="IVEHUB" style="width:100%;height:100%;object-fit:cover;border-radius:26px"></div></div>
+  <div class="s-logo-wrap"><div class="s-ring"></div><div class="s-logo"><img src="/logo.png" alt="IVEZONE" style="width:100%;height:100%;object-fit:cover;border-radius:26px"></div></div>
   <div class="s-hello">Welcome back, Boss</div>
   <div class="s-sub">Preparing your command centerâ€¦</div>
   <div class="s-loader"><span></span><span></span><span></span></div>
@@ -303,7 +303,7 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
 </div>
 <div class="wrap">
  <header>
-  <div class="brand">IVEHUB</div>
+  <div class="brand">IVEZONE</div>
   <div class="tag">Operations Control Portal</div>
   <div class="live"><span class="dot"></span> ALL SYSTEMS LIVE</div>
  </header>
@@ -364,7 +364,7 @@ const MAIN_PAGE = `<!doctype html><html><head><meta charset="utf-8"><title>IVEHU
   </div>
  </div>
 
- <footer>IVEHUB Â· PORTAL v2 Â· <span id="updated"></span></footer>
+ <footer>IVEZONE Â· PORTAL v2 Â· <span id="updated"></span></footer>
 </div>
 
 <div class="overlay" id="ov">
@@ -563,5 +563,5 @@ const server = http.createServer(async (req, res) => {
   res.writeHead(200, { 'Content-Type': 'text/html; charset=utf-8' });
   res.end(MAIN_PAGE);
 });
-server.listen(PORT, () => console.log(`IVEHUB portal (login-gated) on http://localhost:${PORT}`));
+server.listen(PORT, () => console.log(`IVEZONE portal (login-gated) on http://localhost:${PORT}`));
 

@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><title>IVEHUB</title>
+<!doctype html><html><head><meta charset="utf-8"><title>IVEZONE</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <script src="config.js"></script>
 <script src="gdrive.js"></script>
@@ -173,7 +173,7 @@
 <script>
 if (!sessionStorage.getItem('ivehub_auth')) location.href = 'index.html';
 
-const CFG = window.IVEHUB_CONFIG || {};
+const CFG = window.IVEZONE_CONFIG || {};
 const TOKEN_API = CFG.tokenApi || '';
 const TOKEN_KEY = CFG.tokenKey || '';
 const D = () => IVEDB.data();
@@ -333,7 +333,7 @@ const VIEWS = {
  },
  'settings/appearance'(){
   const s = D().settings || {};
-  return `<div class="ph"><h1>Appearance</h1><div class="sub">Make IVEHUB yours</div></div>
+  return `<div class="ph"><h1>Appearance</h1><div class="sub">Make IVEZONE yours</div></div>
   <div class="glass card" style="padding:22px 24px">
    <div class="label" style="margin-bottom:14px">Accent color</div>
    <div class="swflex">${Object.entries(ACCENTS).map(([k,a]) => `<button class="sw${s.accent===k?' on':''}" data-accent="${k}" title="${k}" style="background:${a.hex}">${s.accent===k?'✓':''}</button>`).join('')}</div>
@@ -716,7 +716,7 @@ document.getElementById('view').addEventListener('click', e => {
   } else if (btn.dataset.act === 'edit') {
    openEditor(cat, app);
   } else if (btn.dataset.act === 'del') {
-   if (!confirm('Remove "' + app.name + '" from IVEHUB?')) return;
+   if (!confirm('Remove "' + app.name + '" from IVEZONE?')) return;
    const list = D().apps[cat] || []; const i = list.findIndex(a => a.id === id);
    if (i >= 0) list.splice(i,1);
    const fi = D().favorites.indexOf(app.url); if (fi >= 0) D().favorites.splice(fi,1);
@@ -734,7 +734,7 @@ document.getElementById('view').addEventListener('change', e => {
  r.onload = () => {
   try {
    const d = JSON.parse(r.result);
-   if (!d || typeof d !== 'object') throw new Error('not an IVEHUB backup');
+   if (!d || typeof d !== 'object') throw new Error('not an IVEZONE backup');
    if (!confirm('Replace ALL current data with this backup?')) return;
    IVEDB.replace(d); applySettings(); render(); toast('Backup restored ✓');
   } catch (err) { toast('Import failed: ' + err.message, true); }

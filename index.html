@@ -1,4 +1,4 @@
-<!doctype html><html><head><meta charset="utf-8"><title>IVEHUB · Sign in</title>
+<!doctype html><html><head><meta charset="utf-8"><title>IVEZONE · Sign in</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <style>
  *{box-sizing:border-box;margin:0;padding:0}
@@ -38,8 +38,8 @@
 <div class="bg"><div class="orb a"></div><div class="orb b"></div><div class="orb c"></div></div>
 <div class="grid"></div>
 <form class="card" id="f">
- <div class="logo-wrap"><div class="ring"></div><div class="logo"><img src="ivezone-icon.png" alt="IVEHUB"></div></div>
- <h1>IVEHUB</h1>
+ <div class="logo-wrap"><div class="ring"></div><div class="logo"><img src="ivezone-icon.png" alt="IVEZONE"></div></div>
+ <h1>IVEZONE</h1>
  <div class="sub">Operations Control Portal</div>
  <div class="field"><input type="text" id="user" placeholder="Username" autocomplete="username" style="letter-spacing:2px"></div>
  <div class="field"><input type="password" id="pass" placeholder="Password" autocomplete="current-password"></div>
@@ -48,7 +48,7 @@
  <div class="foot">RESTRICTED · AUTHORISED ACCESS ONLY</div>
 </form>
 <script>
-const CREDS = (window.IVEHUB_CONFIG && window.IVEHUB_CONFIG.creds) || { user: 'jincai04', pass: 'Kin@g123' };
+const CREDS = (window.IVEZONE_CONFIG && window.IVEZONE_CONFIG.creds) || { user: 'jincai04', pass: 'Kin@g123' };
 document.getElementById('f').addEventListener('submit', e => {
   e.preventDefault();
   const u = document.getElementById('user').value.trim(), p = document.getElementById('pass').value;

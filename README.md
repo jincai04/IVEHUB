@@ -1,4 +1,4 @@
-﻿# IVEHUB
+﻿# IVEZONE
 
 Login-gated personal operations portal: Home · Applications · Projects · My Brain · My Tech · My Life · Settings.
 Data syncs through the user's own Google Drive (optional — works without it using browser storage).
@@ -19,7 +19,7 @@ Data syncs through the user's own Google Drive (optional — works without it us
 ## Google Drive sync (one-time setup, ~10 min)
 1. Go to https://console.cloud.google.com/ → create (or pick) a project.
 2. **APIs & Services → Library** → search **Google Drive API** → Enable.
-3. **APIs & Services → OAuth consent screen** → External → fill app name (IVEHUB) + your email → save. Add yourself as a **Test user**. (No verification needed for personal use — you stay in test mode.)
+3. **APIs & Services → OAuth consent screen** → External → fill app name (IVEZONE) + your email → save. Add yourself as a **Test user**. (No verification needed for personal use — you stay in test mode.)
 4. **APIs & Services → Credentials → Create credentials → OAuth client ID** → type **Web application**.
    - **Authorized JavaScript origins**: add your Netlify URL (e.g. `https://ivehub.netlify.app`) and `http://localhost:3000` for local testing.
    - No redirect URIs needed.
@@ -27,7 +27,7 @@ Data syncs through the user's own Google Drive (optional — works without it us
    ```js
    google: { clientId: 'XXXX.apps.googleusercontent.com' }
    ```
-6. In IVEHUB, click **☁ Connect Drive** in the sidebar and consent once. Your data now lives in a file called `ivehub-data.json` in your Drive (created by the app — searchable in Drive).
+6. In IVEZONE, click **☁ Connect Drive** in the sidebar and consent once. Your data now lives in a file called `ivehub-data.json` in your Drive (created by the app — searchable in Drive).
 
 Notes:
 - The app only requests the `drive.file` scope — it can only see/edit files it created itself.
